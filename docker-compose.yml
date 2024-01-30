@@ -1,0 +1,21 @@
+﻿services:
+  versus.db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: versus
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+  versus.host:
+    image: versus
+    build:
+      context: .
+      dockerfile: src/Versus.Host/Dockerfile
+    depends_on:
+        - versus.db
+
+volumes:
+  postgres_data:
