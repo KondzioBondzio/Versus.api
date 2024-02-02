@@ -1,5 +1,6 @@
 ﻿services:
   versus.db:
+    container_name: versus_db
     image: postgres:latest
     environment:
       POSTGRES_PASSWORD: postgres
@@ -10,10 +11,12 @@
     ports:
       - "5432:5432"
   versus.host:
-    image: versus
+    container_name: versus_host
     build:
       context: .
       dockerfile: src/Versus.Host/Dockerfile
+    ports:
+      - "8080:8080"
     depends_on:
         - versus.db
 
