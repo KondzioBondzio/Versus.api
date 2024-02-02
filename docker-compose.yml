@@ -7,7 +7,7 @@
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_DB: versus
     volumes:
-      - postgres_data:/var/lib/postgresql/data/pgdata
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   versus.host:
