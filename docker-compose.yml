@@ -21,4 +21,4 @@
         - versus.db
 
 volumes:
-  postgres_data:
+  postgres-data:
