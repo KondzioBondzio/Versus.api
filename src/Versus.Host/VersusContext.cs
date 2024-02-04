@@ -13,7 +13,12 @@ public static class VersusContext
     public static WebApplicationBuilder AddVersusContext(this WebApplicationBuilder builder)
     {
         builder.Services.AddDbContext<VersusDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("Default"),
+                opt =>
+                {
+                    string? migrationsAssemblyName = typeof(VersusContext).Assembly.GetName().Name;
+                    opt.MigrationsAssembly(migrationsAssemblyName);
+                }));
 
         var coreAssembly = typeof(GetForecast).Assembly;
         builder.Services.AddMediatR(options =>
