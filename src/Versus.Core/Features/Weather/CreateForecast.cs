@@ -6,9 +6,9 @@ namespace Versus.Core.Features.Weather;
 
 public static class CreateForecast
 {
-    public record Request : IRequest<WeatherForecast>;
+    public record Request : IRequest<WeatherForecastDto>;
 
-    public class RequestHandler : IRequestHandler<Request, WeatherForecast>
+    public class RequestHandler : IRequestHandler<Request, WeatherForecastDto>
     {
         private static readonly string[] Summaries =
         [
@@ -17,14 +17,11 @@ public static class CreateForecast
 
         private readonly VersusDbContext _dbContext;
 
-        public RequestHandler(VersusDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public RequestHandler(VersusDbContext dbContext) => _dbContext = dbContext;
 
-        public async Task<WeatherForecast> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<WeatherForecastDto> Handle(Request request, CancellationToken cancellationToken)
         {
-            var forecast = new WeatherForecast
+            WeatherForecast? forecast = new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.UtcNow),
                 TemperatureC = Random.Shared.Next(-20, 55),
@@ -34,7 +31,12 @@ public static class CreateForecast
             await _dbContext.WeatherForecasts.AddAsync(forecast, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return forecast;
+            return new WeatherForecastDto
+            {
+                Id = forecast.Id,
+                TemperatureC = forecast.TemperatureC,
+                Summary = forecast.Summary
+            };
         }
     }
 }

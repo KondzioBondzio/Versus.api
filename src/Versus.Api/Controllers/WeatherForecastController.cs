@@ -1,9 +1,11 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Versus.Core.Features.Weather;
 
 namespace Versus.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
@@ -28,7 +30,7 @@ public class WeatherForecastController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Entering {Endpoint} with id {id}", nameof(GetById), id);
-        var data = await _mediator.Send(new GetForecastById.Request(id), cancellationToken);
+        WeatherForecastDto? data = await _mediator.Send(new GetForecastById.Request(id), cancellationToken);
 
         if (data == null)
         {
@@ -42,7 +44,7 @@ public class WeatherForecastController : ControllerBase
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Entering {Endpoint}", nameof(Create));
-        var data = await _mediator.Send(new CreateForecast.Request(), cancellationToken);
+        WeatherForecastDto data = await _mediator.Send(new CreateForecast.Request(), cancellationToken);
 
         return CreatedAtAction(nameof(Create), new { id = data.Id }, data);
     }
