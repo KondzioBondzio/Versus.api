@@ -37,6 +37,8 @@ public static class VersusContext
 
     private static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
     {
+        // builder.Services.AddDbContext<VersusDbContext>(options => options.UseInMemoryDatabase("Versus"));
+
         builder.Services.AddDbContext<VersusDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Default"),
                 opt =>
