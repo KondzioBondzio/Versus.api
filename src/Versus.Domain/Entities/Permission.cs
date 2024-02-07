@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Versus.Domain.Entities;
 
+[Table("Permissions")]
 public class Permission
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Code { get; set; }
     public string Name { get; set; }
 

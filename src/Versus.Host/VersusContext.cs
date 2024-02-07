@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +11,7 @@ using Versus.Api.Controllers;
 using Versus.Core.Features.Weather;
 using Versus.Domain;
 using Versus.Domain.Entities;
+using Versus.Host.Migrations;
 
 namespace Versus.Host;
 
@@ -47,6 +47,8 @@ public static class VersusContext
                     opt.MigrationsAssembly(migrationsAssemblyName);
                 }));
 
+        builder.Services.AddTransient<VersusMigrator>();
+
         return builder;
     }
 
@@ -58,6 +60,7 @@ public static class VersusContext
 
         builder.AddIdentity(authenticationBuilder, authorizationPolicyBuilder);
         builder.AddKeyCloak(authenticationBuilder, authorizationPolicyBuilder);
+        builder.AddSocialAuth(authenticationBuilder, authorizationPolicyBuilder);
 
         AuthorizationPolicy policy = authorizationPolicyBuilder.RequireAuthenticatedUser().Build();
         builder.Services.AddAuthorizationBuilder()
@@ -73,8 +76,7 @@ public static class VersusContext
         authBuilder.AddBearerToken(IdentityConstants.BearerScheme);
 
         builder.Services.AddIdentity<User, Role>()
-            .AddEntityFrameworkStores<VersusDbContext>()
-            .AddApiEndpoints();
+            .AddEntityFrameworkStores<VersusDbContext>();
 
         policyBuilder.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
 
@@ -85,17 +87,50 @@ public static class VersusContext
         AuthenticationBuilder authBuilder,
         AuthorizationPolicyBuilder policyBuilder)
     {
-        IConfiguration config = builder.Configuration;
-        const string baseSelector = "Authentication:Schemes:KeyCloak";
-        authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        ConfigurationManager config = builder.Configuration;
+        const string keyCloakConfig = "Authentication:Schemes:KeyCloak";
+        if (IsSectionConfigured(config.GetSection(keyCloakConfig)))
         {
-            options.RequireHttpsMetadata = false;
-            options.MetadataAddress = config[$"{baseSelector}:MetadataAddress"] ?? string.Empty;
-            options.Authority = config[$"{baseSelector}:Authority"];
-            options.Audience = config[$"{baseSelector}:Audience"];
-        });
+            authBuilder.AddJwtBearer("KeyCloak", options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.MetadataAddress = config[$"{keyCloakConfig}:MetadataAddress"] ?? string.Empty;
+                options.Authority = config[$"{keyCloakConfig}:Authority"];
+                options.Audience = config[$"{keyCloakConfig}:Audience"];
+            });
+            policyBuilder.AddAuthenticationSchemes("KeyCloak");
+        }
 
-        policyBuilder.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+        return authBuilder;
+    }
+
+    private static AuthenticationBuilder AddSocialAuth(this WebApplicationBuilder builder,
+        AuthenticationBuilder authBuilder,
+        AuthorizationPolicyBuilder policyBuilder)
+    {
+        ConfigurationManager config = builder.Configuration;
+
+        const string googleConfig = "Authentication:Schemes:Google";
+        if (IsSectionConfigured(config.GetSection(googleConfig)))
+        {
+            authBuilder.AddGoogle("Google", options =>
+            {
+                options.ClientId = config[$"{googleConfig}:ClientId"]!;
+                options.ClientSecret = config[$"{googleConfig}:ClientSecret"]!;
+            });
+            policyBuilder.AddAuthenticationSchemes("Google");
+        }
+
+        const string facebookConfig = "Authentication:Schemes:Facebook";
+        if (IsSectionConfigured(config.GetSection(facebookConfig)))
+        {
+            authBuilder.AddFacebook("Facebook", options =>
+            {
+                options.AppId = config[$"{facebookConfig}:AppId"]!;
+                options.AppSecret = config[$"{facebookConfig}:AppSecret"]!;
+            });
+            policyBuilder.AddAuthenticationSchemes("Facebook");
+        }
 
         return authBuilder;
     }
@@ -110,5 +145,15 @@ public static class VersusContext
         }, writeToProviders: true);
 
         return builder;
+    }
+
+    private static bool IsSectionConfigured(IConfigurationSection? section)
+    {
+        if (!section.Exists())
+        {
+            return false;
+        }
+
+        return section.GetChildren().All(child => !string.IsNullOrEmpty(child.Value));
     }
 }

@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Versus.Domain.Entities;
 
-[Table("UserRoles")]
-public class UserRole : IdentityUserRole<Guid>
+[Table("UserTokens")]
+public class UserToken : IdentityUserToken<Guid>
 {
     public virtual User User { get; set; } = null!;
-
-    public virtual Role Role { get; set; } = null!;
 }

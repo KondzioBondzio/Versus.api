@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Versus.Domain.Entities;
 
-[Table("UserRoles")]
-public class UserRole : IdentityUserRole<Guid>
+[Table("UserLogins")]
+public class UserLogin : IdentityUserLogin<Guid>
 {
     public virtual User User { get; set; } = null!;
 
-    public virtual Role Role { get; set; } = null!;
+    public DateTime Timestamp { get; set; }
 }

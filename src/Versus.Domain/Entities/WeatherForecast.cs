@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Versus.Domain.Entities;
 
+[Table("WeatherForecasts")]
 public class WeatherForecast
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public DateOnly Date { get; set; }
     public int TemperatureC { get; set; }
