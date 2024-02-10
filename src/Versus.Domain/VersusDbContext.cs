@@ -4,8 +4,11 @@ using Versus.Domain.Entities;
 
 namespace Versus.Domain;
 
-public class VersusDbContext : IdentityDbContext<User, Role, int>
+public class VersusDbContext : IdentityDbContext<User, Role, Guid>
 {
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+
     public DbSet<WeatherForecast> WeatherForecasts => Set<WeatherForecast>();
 
     public VersusDbContext(DbContextOptions<VersusDbContext> options)

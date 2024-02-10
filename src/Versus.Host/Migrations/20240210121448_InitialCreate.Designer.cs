@@ -12,8 +12,8 @@ using Versus.Domain;
 namespace Versus.Host.Migrations
 {
     [DbContext(typeof(VersusDbContext))]
-    [Migration("20240204165203_InitialIdentity")]
-    partial class InitialIdentity
+    [Migration("20240210121448_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Versus.Host.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,8 +39,8 @@ namespace Versus.Host.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("text");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -49,7 +49,7 @@ namespace Versus.Host.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,8 +63,8 @@ namespace Versus.Host.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -73,7 +73,7 @@ namespace Versus.Host.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -84,8 +84,8 @@ namespace Versus.Host.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -94,13 +94,13 @@ namespace Versus.Host.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -109,10 +109,10 @@ namespace Versus.Host.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -130,11 +130,9 @@ namespace Versus.Host.Migrations
 
             modelBuilder.Entity("Versus.Domain.Entities.Permission", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -146,16 +144,14 @@ namespace Versus.Host.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permission");
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("Versus.Domain.Entities.Role", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -180,17 +176,15 @@ namespace Versus.Host.Migrations
 
             modelBuilder.Entity("Versus.Domain.Entities.RolePermission", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -198,16 +192,14 @@ namespace Versus.Host.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RolePermission");
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("Versus.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -268,36 +260,11 @@ namespace Versus.Host.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Versus.Domain.Entities.UserRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserRole");
-                });
-
             modelBuilder.Entity("Versus.Domain.Entities.WeatherForecast", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
@@ -313,7 +280,7 @@ namespace Versus.Host.Migrations
                     b.ToTable("WeatherForecasts");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Versus.Domain.Entities.Role", null)
                         .WithMany()
@@ -322,7 +289,7 @@ namespace Versus.Host.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.HasOne("Versus.Domain.Entities.User", null)
                         .WithMany()
@@ -331,7 +298,7 @@ namespace Versus.Host.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.HasOne("Versus.Domain.Entities.User", null)
                         .WithMany()
@@ -340,7 +307,7 @@ namespace Versus.Host.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.HasOne("Versus.Domain.Entities.Role", null)
                         .WithMany()
@@ -355,7 +322,7 @@ namespace Versus.Host.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("Versus.Domain.Entities.User", null)
                         .WithMany()
@@ -383,25 +350,6 @@ namespace Versus.Host.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Versus.Domain.Entities.UserRole", b =>
-                {
-                    b.HasOne("Versus.Domain.Entities.Role", "Role")
-                        .WithMany("RoleUsers")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Versus.Domain.Entities.User", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Versus.Domain.Entities.Permission", b =>
                 {
                     b.Navigation("PermissionRoles");
@@ -410,13 +358,6 @@ namespace Versus.Host.Migrations
             modelBuilder.Entity("Versus.Domain.Entities.Role", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("RoleUsers");
-                });
-
-            modelBuilder.Entity("Versus.Domain.Entities.User", b =>
-                {
-                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

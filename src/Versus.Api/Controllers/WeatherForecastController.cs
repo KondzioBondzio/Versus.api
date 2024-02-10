@@ -27,7 +27,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Entering {Endpoint} with id {id}", nameof(GetById), id);
         WeatherForecastDto? data = await _mediator.Send(new GetForecastById.Request(id), cancellationToken);

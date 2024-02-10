@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Versus.Domain;
-using Versus.Domain.Entities;
 using Versus.Host;
 
 Log.Logger = new LoggerConfiguration()
@@ -15,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => { options.CustomSchemaIds(type => type.FullName); });
+builder.Services.AddSwaggerGen(options => { options.CustomSchemaIds(type => type.FullName!.Replace("+", ".")); });
 
 builder.AddVersusContext();
 
@@ -33,7 +31,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapIdentityApi<User>();
+// app.MapIdentityApi<User>();
 
 try
 {

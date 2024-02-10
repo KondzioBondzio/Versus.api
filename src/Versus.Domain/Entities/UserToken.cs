@@ -3,12 +3,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Versus.Domain.Entities;
 
-[Table("UserRoles")]
-public class UserRole : IdentityUserRole<Guid>
+[Table("UserTokens")]
+public class UserToken : IdentityUserToken<Guid>
 {
     // [ForeignKey(nameof(UserId))]
     // public virtual User User { get; set; } = null!;
-    //
-    // [ForeignKey(nameof(RoleId))]
-    // public virtual Role Role { get; set; } = null!;
 }

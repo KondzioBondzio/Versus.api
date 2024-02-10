@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Versus.Host.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,8 +16,7 @@ namespace Versus.Host.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
@@ -31,8 +30,7 @@ namespace Versus.Host.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -54,17 +52,30 @@ namespace Versus.Host.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permission",
+                name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Permission", x => x.Id);
+                    table.PrimaryKey("PK_Permissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WeatherForecasts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    TemperatureC = table.Column<int>(type: "integer", nullable: false),
+                    Summary = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WeatherForecasts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,7 +84,7 @@ namespace Versus.Host.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -94,7 +105,7 @@ namespace Versus.Host.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -116,7 +127,7 @@ namespace Versus.Host.Migrations
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -133,8 +144,8 @@ namespace Versus.Host.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -157,7 +168,7 @@ namespace Versus.Host.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true)
@@ -174,53 +185,26 @@ namespace Versus.Host.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRole",
+                name: "RolePermissions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PermissionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRole", x => x.Id);
+                    table.PrimaryKey("PK_RolePermissions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRole_AspNetRoles_RoleId",
+                        name: "FK_RolePermissions_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRole_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RolePermission",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
-                    PermissionId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RolePermission", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RolePermission_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RolePermission_Permission_PermissionId",
+                        name: "FK_RolePermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
-                        principalTable: "Permission",
+                        principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -263,24 +247,14 @@ namespace Versus.Host.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePermission_PermissionId",
-                table: "RolePermission",
+                name: "IX_RolePermissions_PermissionId",
+                table: "RolePermissions",
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePermission_RoleId",
-                table: "RolePermission",
+                name: "IX_RolePermissions_RoleId",
+                table: "RolePermissions",
                 column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRole_RoleId",
-                table: "UserRole",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRole_UserId",
-                table: "UserRole",
-                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -302,19 +276,19 @@ namespace Versus.Host.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "RolePermission");
+                name: "RolePermissions");
 
             migrationBuilder.DropTable(
-                name: "UserRole");
+                name: "WeatherForecasts");
 
             migrationBuilder.DropTable(
-                name: "Permission");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Permissions");
         }
     }
 }

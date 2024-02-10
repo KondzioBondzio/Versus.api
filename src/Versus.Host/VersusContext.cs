@@ -58,6 +58,7 @@ public static class VersusContext
 
         builder.AddIdentity(authenticationBuilder, authorizationPolicyBuilder);
         builder.AddKeyCloak(authenticationBuilder, authorizationPolicyBuilder);
+        builder.AddSocialAuth(authenticationBuilder, authorizationPolicyBuilder);
 
         AuthorizationPolicy policy = authorizationPolicyBuilder.RequireAuthenticatedUser().Build();
         builder.Services.AddAuthorizationBuilder()
@@ -73,8 +74,7 @@ public static class VersusContext
         authBuilder.AddBearerToken(IdentityConstants.BearerScheme);
 
         builder.Services.AddIdentity<User, Role>()
-            .AddEntityFrameworkStores<VersusDbContext>()
-            .AddApiEndpoints();
+            .AddEntityFrameworkStores<VersusDbContext>();
 
         policyBuilder.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
 
@@ -99,6 +99,16 @@ public static class VersusContext
 
         return authBuilder;
     }
+
+    private static AuthenticationBuilder AddSocialAuth(this WebApplicationBuilder builder,
+        AuthenticationBuilder authBuilder,
+        AuthorizationPolicyBuilder policyBuilder) =>
+        // authBuilder.AddGoogle();
+        // authBuilder.AddFacebook();
+        //
+        // policyBuilder.AddAuthenticationSchemes("Google");
+        // policyBuilder.AddAuthenticationSchemes("Facebook");
+        authBuilder;
 
     private static WebApplicationBuilder AddLogging(this WebApplicationBuilder builder)
     {
