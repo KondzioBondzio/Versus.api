@@ -6,6 +6,5 @@ namespace Versus.Domain.Entities;
 [Table("UserTokens")]
 public class UserToken : IdentityUserToken<Guid>
 {
-    // [ForeignKey(nameof(UserId))]
-    // public virtual User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }

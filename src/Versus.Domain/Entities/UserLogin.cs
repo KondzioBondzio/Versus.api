@@ -6,8 +6,7 @@ namespace Versus.Domain.Entities;
 [Table("UserLogins")]
 public class UserLogin : IdentityUserLogin<Guid>
 {
-    // [ForeignKey(nameof(UserId))]
-    // public virtual User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 
     public DateTime Timestamp { get; set; }
 }

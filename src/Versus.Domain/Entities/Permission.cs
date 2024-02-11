@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Versus.Domain.Entities;
 
+[Table("Permissions")]
 public class Permission
 {
     public Guid Id { get; set; }

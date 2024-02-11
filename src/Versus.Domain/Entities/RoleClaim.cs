@@ -6,6 +6,5 @@ namespace Versus.Domain.Entities;
 [Table("RoleClaims")]
 public class RoleClaim : IdentityRoleClaim<Guid>
 {
-    // [ForeignKey(nameof(RoleId))]
-    // public virtual Role Role { get; set; } = null!;
+    public virtual Role Role { get; set; } = null!;
 }

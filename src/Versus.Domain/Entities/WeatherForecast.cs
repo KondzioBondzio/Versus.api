@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Versus.Domain.Entities;
 
+[Table("WeatherForecasts")]
 public class WeatherForecast
 {
     public Guid Id { get; set; }

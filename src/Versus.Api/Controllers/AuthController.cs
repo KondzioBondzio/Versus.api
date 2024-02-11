@@ -112,20 +112,6 @@ public class AuthController : ControllerBase
         return TypedResults.Ok();
     }
 
-    [HttpPost("2fa")]
-    public async Task<IActionResult> TwoFactorAuthentication(ClaimsPrincipal claimsPrincipal,
-        [FromBody] TwoFactorAuthentication.Request request, CancellationToken cancellationToken = default)
-    {
-        request.ClaimsPrincipal = claimsPrincipal;
-        TwoFactorResponse? result = await _mediator.Send(request, cancellationToken);
-        if (result == null)
-        {
-            return BadRequest();
-        }
-
-        return Ok(result);
-    }
-
     private static ValidationProblem CreateValidationProblem(IdentityResult result)
     {
         Dictionary<string, string[]> errorDictionary = new(1);

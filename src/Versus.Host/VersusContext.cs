@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +11,7 @@ using Versus.Api.Controllers;
 using Versus.Core.Features.Weather;
 using Versus.Domain;
 using Versus.Domain.Entities;
+using Versus.Host.Migrations;
 
 namespace Versus.Host;
 
@@ -46,6 +46,8 @@ public static class VersusContext
                     string? migrationsAssemblyName = typeof(VersusContext).Assembly.GetName().Name;
                     opt.MigrationsAssembly(migrationsAssemblyName);
                 }));
+
+        builder.Services.AddTransient<VersusMigrator>();
 
         return builder;
     }
@@ -85,30 +87,53 @@ public static class VersusContext
         AuthenticationBuilder authBuilder,
         AuthorizationPolicyBuilder policyBuilder)
     {
-        IConfiguration config = builder.Configuration;
-        const string baseSelector = "Authentication:Schemes:KeyCloak";
-        authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        ConfigurationManager config = builder.Configuration;
+        const string keyCloakConfig = "Authentication:Schemes:KeyCloak";
+        if (IsSectionConfigured(config.GetSection(keyCloakConfig)))
         {
-            options.RequireHttpsMetadata = false;
-            options.MetadataAddress = config[$"{baseSelector}:MetadataAddress"] ?? string.Empty;
-            options.Authority = config[$"{baseSelector}:Authority"];
-            options.Audience = config[$"{baseSelector}:Audience"];
-        });
-
-        policyBuilder.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+            authBuilder.AddJwtBearer("KeyCloak", options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.MetadataAddress = config[$"{keyCloakConfig}:MetadataAddress"] ?? string.Empty;
+                options.Authority = config[$"{keyCloakConfig}:Authority"];
+                options.Audience = config[$"{keyCloakConfig}:Audience"];
+            });
+            policyBuilder.AddAuthenticationSchemes("KeyCloak");
+        }
 
         return authBuilder;
     }
 
     private static AuthenticationBuilder AddSocialAuth(this WebApplicationBuilder builder,
         AuthenticationBuilder authBuilder,
-        AuthorizationPolicyBuilder policyBuilder) =>
-        // authBuilder.AddGoogle();
-        // authBuilder.AddFacebook();
-        //
-        // policyBuilder.AddAuthenticationSchemes("Google");
-        // policyBuilder.AddAuthenticationSchemes("Facebook");
-        authBuilder;
+        AuthorizationPolicyBuilder policyBuilder)
+    {
+        ConfigurationManager config = builder.Configuration;
+
+        const string googleConfig = "Authentication:Schemes:Google";
+        if (IsSectionConfigured(config.GetSection(googleConfig)))
+        {
+            authBuilder.AddGoogle("Google", options =>
+            {
+                options.ClientId = config[$"{googleConfig}:ClientId"]!;
+                options.ClientSecret = config[$"{googleConfig}:ClientSecret"]!;
+            });
+            policyBuilder.AddAuthenticationSchemes("Google");
+        }
+
+        const string facebookConfig = "Authentication:Schemes:Facebook";
+        if (IsSectionConfigured(config.GetSection(facebookConfig)))
+        {
+            authBuilder.AddFacebook("Facebook", options =>
+            {
+                options.AppId = config[$"{facebookConfig}:AppId"]!;
+                options.AppSecret = config[$"{facebookConfig}:AppSecret"]!;
+            });
+            policyBuilder.AddAuthenticationSchemes("Facebook");
+        }
+
+        return authBuilder;
+    }
 
     private static WebApplicationBuilder AddLogging(this WebApplicationBuilder builder)
     {
@@ -120,5 +145,15 @@ public static class VersusContext
         }, writeToProviders: true);
 
         return builder;
+    }
+
+    private static bool IsSectionConfigured(IConfigurationSection? section)
+    {
+        if (!section.Exists())
+        {
+            return false;
+        }
+
+        return section.GetChildren().All(child => !string.IsNullOrEmpty(child.Value));
     }
 }

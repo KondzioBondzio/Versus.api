@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Serilog;
-using Versus.Domain;
 using Versus.Host;
+using Versus.Host.Migrations;
 
 Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
@@ -13,7 +13,32 @@ Log.Logger = new LoggerConfiguration()
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => { options.CustomSchemaIds(type => type.FullName!.Replace("+", ".")); });
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.FullName!.Replace("+", "."));
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = IdentityConstants.BearerScheme
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = IdentityConstants.BearerScheme
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.AddVersusContext();
 
@@ -31,23 +56,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-// app.MapIdentityApi<User>();
 
 try
 {
     using (IServiceScope scope = app.Services.CreateScope())
     {
         IServiceProvider services = scope.ServiceProvider;
-        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
-        VersusDbContext dbContext = services.GetRequiredService<VersusDbContext>();
-
-        IEnumerable<string> pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-        if (pendingMigrations.Any())
-        {
-            logger.LogInformation("Pending migrations found. Migrating now..");
-            await dbContext.Database.MigrateAsync();
-            logger.LogInformation("Migration complete.");
-        }
+        VersusMigrator migrator = services.GetRequiredService<VersusMigrator>();
+        await migrator.MigrateAsync();
     }
 
     await app.RunAsync();
