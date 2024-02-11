@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,24 +16,6 @@
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2"/>
     <PackageReference Include="FluentValidation" Version="11.9.0"/>
     <PackageReference Include="MediatR" Version="12.2.0"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Authentication.Abstractions">
-      <HintPath>..\..\..\..\..\..\..\usr\share\dotnet\shared\Microsoft.AspNetCore.App\8.0.1\Microsoft.AspNetCore.Authentication.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Identity">
-      <HintPath>..\..\..\..\..\..\..\usr\share\dotnet\shared\Microsoft.AspNetCore.App\8.0.1\Microsoft.AspNetCore.Identity.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
-      <HintPath>..\..\..\..\..\..\..\usr\share\dotnet\shared\Microsoft.AspNetCore.App\8.0.1\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens">
-      <HintPath>..\..\..\..\..\.nuget\packages\microsoft.identitymodel.tokens\7.1.2\lib\net8.0\Microsoft.IdentityModel.Tokens.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IdentityModel.Tokens.Jwt">
-      <HintPath>..\..\..\..\..\.nuget\packages\system.identitymodel.tokens.jwt\7.1.2\lib\net8.0\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

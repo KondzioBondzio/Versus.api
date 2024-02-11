@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Versus.Core.Features.Auth;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Versus.Api.Controllers;
 
@@ -44,7 +43,7 @@ public class AuthController : ControllerBase
     public async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> Login
         ([FromBody] Login.Request request, CancellationToken cancellationToken = default)
     {
-        SignInResult result = await _mediator.Send(request, cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.Succeeded)
         {
             return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
