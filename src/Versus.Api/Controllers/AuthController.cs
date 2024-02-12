@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Versus.Core.Features.Auth;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Versus.Api.Controllers;
 
@@ -43,7 +44,7 @@ public class AuthController : ControllerBase
     public async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> Login
         ([FromBody] Login.Request request, CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(request, cancellationToken);
+        SignInResult result = await _mediator.Send(request, cancellationToken);
         if (!result.Succeeded)
         {
             return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
@@ -60,7 +61,9 @@ public class AuthController : ControllerBase
         ISecureDataFormat<AuthenticationTicket> tokenProtector = _optionsMonitor.Get(scheme).RefreshTokenProtector;
         AuthenticationTicket? refreshTicket = tokenProtector.Unprotect(request.RefreshToken);
 
-        ClaimsPrincipal? result = await _mediator.Send(new Refresh.Request(refreshTicket), cancellationToken);
+        Refresh.Request refreshRequest =
+            new Refresh.Request(refreshTicket?.Principal, refreshTicket?.Properties.ExpiresUtc);
+        ClaimsPrincipal? result = await _mediator.Send(refreshRequest, cancellationToken);
         if (result == null)
         {
             return TypedResults.Challenge();

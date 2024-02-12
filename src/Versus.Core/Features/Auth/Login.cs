@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Versus.Core.Identity;
 using Versus.Domain.Entities;
 
 namespace Versus.Core.Features.Auth;
@@ -26,13 +27,14 @@ public static class Login
 
     public class RequestHandler : IRequestHandler<Request, SignInResult>
     {
-        private readonly SignInManager<User> _signInManager;
+        private const string AuthenticationScheme = "Identity.Bearer";
+        private readonly ISignInManager<User> _signInManager;
 
-        public RequestHandler(SignInManager<User> signInManager) => _signInManager = signInManager;
+        public RequestHandler(ISignInManager<User> signInManager) => _signInManager = signInManager;
 
         public async Task<SignInResult> Handle(Request request, CancellationToken cancellationToken)
         {
-            _signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
+            _signInManager.AuthenticationScheme = AuthenticationScheme;
             SignInResult result =
                 await _signInManager.PasswordSignInAsync(request.Login, request.Password, false, false);
             if (result.RequiresTwoFactor)

@@ -9,8 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Versus.Api.Controllers;
 using Versus.Core.Features.Weather;
+using Versus.Core.Identity;
 using Versus.Domain;
 using Versus.Domain.Entities;
+using Versus.Host.Identity;
 using Versus.Host.Migrations;
 
 namespace Versus.Host;
@@ -31,6 +33,8 @@ public static class VersusContext
             options.RegisterServicesFromAssembly(coreAssembly));
 
         builder.AddLogging();
+
+        builder.Services.AddVersusServices();
 
         return builder;
     }
@@ -145,6 +149,12 @@ public static class VersusContext
         }, writeToProviders: true);
 
         return builder;
+    }
+
+    private static IServiceCollection AddVersusServices(this IServiceCollection services)
+    {
+        services.AddScoped<ISignInManager<User>, VersusSignInManager>();
+        return services;
     }
 
     private static bool IsSectionConfigured(IConfigurationSection? section)
