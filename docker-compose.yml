@@ -1,5 +1,5 @@
 ﻿services:
-  versus.db:
+  db:
     container_name: versus_db
     image: postgres:latest
     environment:
@@ -10,15 +10,15 @@
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-  versus.host:
-    container_name: versus_host
+  api:
+    container_name: versus_api
     build:
       context: .
-      dockerfile: src/Versus.Host/Dockerfile
+      dockerfile: src/Versus.Api/Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-        - versus.db
+        - db
 
 volumes:
   postgres-data:

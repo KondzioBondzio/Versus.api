@@ -3,7 +3,7 @@
 {
     "name": "C# (.NET) and PostgreSQL",
     "dockerComposeFile": "docker-compose.yml",
-    "service": "app",
+    "service": "versus_api",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

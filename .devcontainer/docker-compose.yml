@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  app:
+  versus_api:
+    container_name: versus_api
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,7 +14,7 @@ services:
     command: sleep infinity
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:db
+    network_mode: service:versus_db
     
     # Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
     # user: root
@@ -21,7 +22,8 @@ services:
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
-  db:
+  versus_db:
+    container_name: versus_db
     image: postgres:latest
     restart: unless-stopped
     volumes:

@@ -1,139 +1,136 @@
 using System.Security.Claims;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Versus.Core.Features.Auth;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+using Microsoft.EntityFrameworkCore;
+using Versus.Api.Data;
+using Versus.Api.Entities;
+using Versus.Api.Services;
+using Versus.Shared.Auth;
 
 namespace Versus.Api.Controllers;
 
 [AllowAnonymous]
-[ApiController]
-[Route("[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly IOptionsMonitor<BearerTokenOptions> _optionsMonitor;
+    private readonly ITokenService _tokenService;
+    private readonly VersusDbContext _dbContext;
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
 
-    public AuthController(IMediator mediator, IOptionsMonitor<BearerTokenOptions> optionsMonitor)
+    public AuthController(ITokenService tokenService,
+        VersusDbContext dbContext,
+        UserManager<User> userManager,
+        SignInManager<User> signInManager)
     {
-        _mediator = mediator;
-        _optionsMonitor = optionsMonitor;
-    }
-
-    [HttpPost("register")]
-    public async Task<Results<Ok, ValidationProblem>> Register
-        ([FromBody] Register.Request request, CancellationToken cancellationToken = default)
-    {
-        IdentityResult result = await _mediator.Send(request, cancellationToken);
-        if (!result.Succeeded)
-        {
-            return CreateValidationProblem(result);
-        }
-
-        return TypedResults.Ok();
+        _tokenService = tokenService;
+        _dbContext = dbContext;
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     [HttpPost("login")]
-    public async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> Login
-        ([FromBody] Login.Request request, CancellationToken cancellationToken = default)
-    {
-        SignInResult result = await _mediator.Send(request, cancellationToken);
-        if (!result.Succeeded)
-        {
-            return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
-        }
-
-        return TypedResults.Empty;
-    }
-
-    [HttpPost("refresh")]
-    public async Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>>
-        Refresh([FromBody] RefreshRequest request, CancellationToken cancellationToken = default)
-    {
-        string scheme = IdentityConstants.BearerScheme;
-        ISecureDataFormat<AuthenticationTicket> tokenProtector = _optionsMonitor.Get(scheme).RefreshTokenProtector;
-        AuthenticationTicket? refreshTicket = tokenProtector.Unprotect(request.RefreshToken);
-
-        Refresh.Request refreshRequest =
-            new Refresh.Request(refreshTicket?.Principal, refreshTicket?.Properties.ExpiresUtc);
-        ClaimsPrincipal? result = await _mediator.Send(refreshRequest, cancellationToken);
-        if (result == null)
-        {
-            return TypedResults.Challenge();
-        }
-
-        return TypedResults.SignIn(result, authenticationScheme: IdentityConstants.BearerScheme);
-    }
-
-    [HttpGet("confirmEmail")]
-    public async Task<Results<Ok, UnauthorizedHttpResult>> ConfirmEmail(
-        [FromQuery] string id, [FromQuery] string code, CancellationToken cancellationToken = default)
-    {
-        IdentityResult result = await _mediator.Send(new ConfirmEmail.Request(id, code), cancellationToken);
-        if (!result.Succeeded)
-        {
-            return TypedResults.Unauthorized();
-        }
-
-        return TypedResults.Ok();
-    }
-
-    [HttpPost("resendConfirmationEmail")]
-    public async Task<IActionResult> ResendConfirmationEmail
-        ([FromBody] ResendConfirmationEmail.Request request, CancellationToken cancellationToken = default)
-    {
-        await _mediator.Send(request, cancellationToken);
-        return Ok();
-    }
-
-    [HttpPost("forgotPassword")]
-    public async Task<IActionResult> ForgotPassword
-        (ForgotPassword.Request request, CancellationToken cancellationToken = default)
-    {
-        await _mediator.Send(request, cancellationToken);
-        return Ok();
-    }
-
-    [HttpPost("resetPassword")]
-    public async Task<Results<Ok, ValidationProblem>> ResetPassword(ResetPassword.Request request,
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request,
         CancellationToken cancellationToken = default)
     {
-        IdentityResult result = await _mediator.Send(request, cancellationToken);
+        var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == request.Login, cancellationToken);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
         if (!result.Succeeded)
         {
-            return CreateValidationProblem(result);
+            return Unauthorized();
         }
 
-        return TypedResults.Ok();
+        string accessToken = _tokenService.GenerateAccessToken(user);
+        string refreshToken = _tokenService.GenerateRefreshToken(user);
+
+        return Ok(new LoginResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
     }
 
-    private static ValidationProblem CreateValidationProblem(IdentityResult result)
+    [HttpPost("register")]
+    public async Task<ActionResult<RegisterRequest>> Register([FromBody] RegisterRequest request,
+        CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string[]> errorDictionary = new(1);
-        foreach (IdentityError? error in result.Errors)
+        var user = new User
         {
-            string[] newDescriptions;
-            if (errorDictionary.TryGetValue(error.Code, out string[]? descriptions))
-            {
-                newDescriptions = new string[descriptions.Length + 1];
-                Array.Copy(descriptions, newDescriptions, descriptions.Length);
-                newDescriptions[descriptions.Length] = error.Description;
-            }
-            else
-            {
-                newDescriptions = [error.Description];
-            }
-
-            errorDictionary[error.Code] = newDescriptions;
+            UserName = request.Login,
+            Email = request.Email
+        };
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
         }
 
-        return TypedResults.ValidationProblem(errorDictionary);
+        return Ok();
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<RefreshTokenResponse>> RefreshToken([FromBody] RefreshTokenRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_tokenService.IsTokenValid(request.Token))
+        {
+            return Unauthorized();
+        }
+
+        ClaimsPrincipal principal = _tokenService.ReadToken(request.Token);
+        string? id = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        string accessToken = _tokenService.GenerateAccessToken(user);
+        string refreshToken = _tokenService.GenerateRefreshToken(user);
+
+        return Ok(new LoginResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        });
+    }
+
+    [HttpGet("login/{scheme}")]
+    public async Task<IActionResult> ExternalLogin(string scheme)
+    {
+        string? redirectUrl = Url.Action(nameof(ExternalLoginCallback), new { scheme });
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+
+        return scheme switch
+        {
+            GoogleDefaults.AuthenticationScheme => Challenge(properties, GoogleDefaults.AuthenticationScheme),
+            _ => throw new NotSupportedException()
+        };
+    }
+
+    [HttpGet("login/{scheme}/callback")]
+    public async Task<IActionResult> ExternalLoginCallback(string scheme)
+    {
+        // Handle external login callback, including creating a local user if necessary
+        var auth = await Request.HttpContext.AuthenticateAsync(scheme);
+        if (!auth.Succeeded)
+        {
+            return BadRequest();
+        }
+
+        var findClaim = (string type) =>
+            auth.Principal.Claims
+                .Where(x => x.Type == type)
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+        return Content($"{auth.Principal?.Identity?.IsAuthenticated} | {findClaim(ClaimTypes.NameIdentifier)} | {findClaim(ClaimTypes.Email)}");
     }
 }
