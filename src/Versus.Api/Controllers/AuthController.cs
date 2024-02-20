@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,25 +33,25 @@ public class AuthController : ApiControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> Login
+        ([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == request.Login, cancellationToken);
         if (user == null)
         {
-            return Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
         if (!result.Succeeded)
         {
-            return Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         string accessToken = _tokenService.GenerateAccessToken(user);
         string refreshToken = _tokenService.GenerateRefreshToken(user);
 
-        return Ok(new LoginResponse
+        return TypedResults.Ok(new LoginResponse
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken
@@ -58,8 +59,8 @@ public class AuthController : ApiControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<RegisterRequest>> Register([FromBody] RegisterRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Results<Ok, ProblemHttpResult>> Register
+        ([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
     {
         var user = new User
         {
@@ -69,19 +70,19 @@ public class AuthController : ApiControllerBase
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            return BadRequest(result.Errors);
+            return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status400BadRequest);
         }
 
-        return Ok();
+        return TypedResults.Ok();
     }
 
     [HttpPost("refresh-token")]
-    public async Task<ActionResult<RefreshTokenResponse>> RefreshToken([FromBody] RefreshTokenRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> RefreshToken
+        ([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         if (!_tokenService.IsTokenValid(request.Token))
         {
-            return Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         ClaimsPrincipal principal = _tokenService.ReadToken(request.Token);
@@ -89,13 +90,13 @@ public class AuthController : ApiControllerBase
         var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (user == null)
         {
-            return Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         string accessToken = _tokenService.GenerateAccessToken(user);
         string refreshToken = _tokenService.GenerateRefreshToken(user);
 
-        return Ok(new LoginResponse
+        return TypedResults.Ok(new RefreshTokenResponse
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken
@@ -131,6 +132,7 @@ public class AuthController : ApiControllerBase
                 .Select(x => x.Value)
                 .FirstOrDefault();
 
-        return Content($"{auth.Principal?.Identity?.IsAuthenticated} | {findClaim(ClaimTypes.NameIdentifier)} | {findClaim(ClaimTypes.Email)}");
+        return Content(
+            $"{auth.Principal?.Identity?.IsAuthenticated} | {findClaim(ClaimTypes.NameIdentifier)} | {findClaim(ClaimTypes.Email)}");
     }
 }
