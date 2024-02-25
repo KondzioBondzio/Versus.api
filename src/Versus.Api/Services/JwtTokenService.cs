@@ -1,7 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Versus.Api.Configuration;
 using Versus.Api.Entities;
 
 namespace Versus.Api.Services;
@@ -12,27 +14,19 @@ public class JwtTokenService : ITokenService
     private readonly string _issuer;
     private readonly SecurityKey _key;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(IOptions<JwtTokenConfiguration> options)
     {
-        const string jwtBearerConfig = "Authentication:Schemes:JwtBearer";
-        _audience = configuration[$"{jwtBearerConfig}:Audience"]!;
-        _issuer = configuration[$"{jwtBearerConfig}:Issuer"]!;
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[$"{jwtBearerConfig}:Key"]!));
+        _audience = options.Value.Audience;
+        _issuer = options.Value.Issuer;
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.Key));
     }
 
     public string GenerateAccessToken(User user)
     {
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName!),
-            new Claim(ClaimTypes.Email, user.Email!)
-        };
-
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
+            Subject = GetClaimsIdentityFromUser(user),
             SigningCredentials = credentials,
             Expires = DateTime.UtcNow.AddMinutes(15),
             Audience = _audience,
@@ -45,17 +39,10 @@ public class JwtTokenService : ITokenService
 
     public string GenerateRefreshToken(User user)
     {
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName!),
-            new Claim(ClaimTypes.Email, user.Email!)
-        };
-
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
+            Subject = GetClaimsIdentityFromUser(user),
             SigningCredentials = credentials,
             Expires = DateTime.UtcNow.AddHours(24),
             Audience = _audience,
@@ -93,5 +80,17 @@ public class JwtTokenService : ITokenService
         {
             return false;
         }
+    }
+
+    private static ClaimsIdentity GetClaimsIdentityFromUser(User user)
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Email, user.Email!)
+        };
+
+        return new ClaimsIdentity(claims);
     }
 }
