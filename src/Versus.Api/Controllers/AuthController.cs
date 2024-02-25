@@ -86,7 +86,9 @@ public class AuthController : ApiControllerBase
         }
 
         ClaimsPrincipal principal = _tokenService.ReadToken(request.Token);
-        string? id = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        string? id = principal.Claims.Where(x => x.Type == ClaimTypes.NameIdentifier)
+            .Select(x => x.Value)
+            .FirstOrDefault();
         var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (user == null)
         {
