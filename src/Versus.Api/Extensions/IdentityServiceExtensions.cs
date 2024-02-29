@@ -20,8 +20,7 @@ public static class IdentityServiceExtensions
         // });
 
         services.AddIdentity<User, Role>()
-            .AddEntityFrameworkStores<VersusDbContext>()
-            .AddApiEndpoints();
+            .AddEntityFrameworkStores<VersusDbContext>();
 
         AuthenticationBuilder authenticationBuilder = services.AddAuthentication(IdentityConstants.BearerScheme)
             .AddBearerToken(IdentityConstants.BearerScheme);
@@ -63,6 +62,20 @@ public static class IdentityServiceExtensions
         {
             authenticationBuilder.AddGoogle(options =>
             {
+                options.Events.OnRedirectToAuthorizationEndpoint = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api/Auth/login"))
+                    {
+                        context.Response.Redirect(context.RedirectUri);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    }
+
+                    return Task.CompletedTask;
+                };
+
                 options.ClientId = configuration[$"{googleConfig}:ClientId"]!;
                 options.ClientSecret = configuration[$"{googleConfig}:ClientSecret"]!;
             });

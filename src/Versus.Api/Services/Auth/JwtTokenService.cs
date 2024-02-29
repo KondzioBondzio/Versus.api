@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Versus.Api.Configuration;
 using Versus.Api.Entities;
 
-namespace Versus.Api.Services;
+namespace Versus.Api.Services.Auth;
 
 public class JwtTokenService : ITokenService
 {

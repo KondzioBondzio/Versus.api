@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Versus.Api.Configuration;
 using Versus.Api.Entities;
 using Versus.Api.Services;
+using Versus.Api.Services.Auth;
 
 namespace Versus.Api.Tests.Auth;
 

@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using Versus.Api.Entities;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
 using Versus.Api.Migrations;
@@ -14,9 +13,9 @@ builder.Services.AddSwagger();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddVersusServices(builder.Configuration);
-builder.Services.AddControllers();
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.RegisterModules();
 
 WebApplication app = builder.Build();
 
@@ -28,15 +27,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseExceptionHandler(_ => { });
+// app.UseExceptionHandler(_ => { });
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGroup("api/v1/auth")
-    .MapIdentityApi<User>();
-
-app.MapControllers();
+app.MapEndpoints();
 
 try
 {
@@ -49,5 +45,5 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Startup failed");
+    Log.Fatal(ex, "Host terminated unexpectedly");
 }
