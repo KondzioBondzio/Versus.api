@@ -27,7 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseExceptionHandler(_ => { });
+app.UseExceptionHandler(_ => { });
 
 app.UseAuthentication();
 app.UseAuthorization();

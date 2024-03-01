@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Versus.Api.Entities;
-using Versus.Api.Services;
+using Versus.Api.Exceptions;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
@@ -20,11 +20,17 @@ public static class RegisterHandler
             Email = request.Email
         };
 
-        await userService.CreateAsync(user, request.Password, cancellationToken);
-        // if (!result)
-        // {
-        //     return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status400BadRequest);
-        // }
+        try
+        {
+            await userService.CreateAsync(user, request.Password, cancellationToken);
+        }
+        catch (ValidationException ex)
+        {
+            return TypedResults.Problem(
+                title: ex.Message,
+                detail: string.Join(Environment.NewLine, ex.ValidationErrors),
+                statusCode: StatusCodes.Status400BadRequest);
+        }
 
         return TypedResults.Ok();
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Versus.Api.Entities;
+using Versus.Api.Validation;
 
 namespace Versus.Api.Services.Auth;
 
@@ -22,8 +23,20 @@ public class EfUserService : IUserService
         return _userManager.FindByEmailAsync(email);
     }
 
-    public Task CreateAsync(User user, string password, CancellationToken cancellationToken = default)
+    public async Task CreateAsync(User user, string password, CancellationToken cancellationToken = default)
     {
-        return _userManager.CreateAsync(user, password);
+        var result = await _userManager.CreateAsync(user, password);
+        if (result.Succeeded)
+        {
+            return;
+        }
+
+        ValidationState validationState = new();
+        foreach (var error in result.Errors)
+        {
+            validationState.AddError(error.Code, error.Description);
+        }
+
+        validationState.EnsureValid();
     }
 }
