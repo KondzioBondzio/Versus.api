@@ -1,5 +1,4 @@
-﻿using Versus.Api.Services;
-using Versus.Api.Services.Auth;
+﻿using Versus.Api.Services.Auth;
 
 namespace Versus.Api.Modules.Auth;
 
@@ -21,11 +20,11 @@ public class AuthModule : IModule
             .MapGroup(string.Empty)
             .AllowAnonymous();
 
-        routeGroup.MapPost("/login", LoginHandler.Handle);
-        routeGroup.MapPost("/register", RegisterHandler.Handle);
-        routeGroup.MapPost("/refresh-token", RefreshTokenHandler.Handle);
+        routeGroup.MapPost("/login", LoginHandler.HandleAsync);
+        routeGroup.MapPost("/register", RegisterHandler.HandleAsync);
+        routeGroup.MapPost("/refresh-token", RefreshTokenHandler.HandleAsync);
         routeGroup.MapGet("/login/{scheme}", ExternalLoginHandler.Handle);
-        routeGroup.MapGet("/login/{scheme}/callback", ExternalLoginCallbackHandler.Handle);
+        routeGroup.MapGet("/login/{scheme}/callback", ExternalLoginCallbackHandler.HandleAsync);
 
         return routeGroup;
     }

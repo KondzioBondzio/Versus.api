@@ -1,19 +1,37 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Versus.Api.Services;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Modules.Auth;
 
+public record LoginParameters
+{
+    public LoginRequest Request { get; init; } = default!;
+    public IAuthService AuthService { get; init; } = default!;
+    public ITokenService TokenService { get; init; } = default!;
+    public IUserService UserService { get; init; } = default!;
+    public CancellationToken CancellationToken { get; init; } = default!;
+
+    public void Deconstruct(out LoginRequest request,
+        out IAuthService authService,
+        out ITokenService tokenService,
+        out IUserService userService,
+        out CancellationToken cancellationToken)
+    {
+        request = Request;
+        authService = AuthService;
+        tokenService = TokenService;
+        userService = UserService;
+        cancellationToken = CancellationToken;
+    }
+}
+
 public static class LoginHandler
 {
-    public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> Handle
-        ([FromServices] IServiceProvider sp, LoginRequest request, CancellationToken cancellationToken)
+    public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> HandleAsync
+        ([AsParameters] LoginParameters parameters)
     {
-        var authService = sp.GetRequiredService<IAuthService>();
-        var tokenService = sp.GetRequiredService<ITokenService>();
-        var userService = sp.GetRequiredService<IUserService>();
+        var (request, authService, tokenService, userService, cancellationToken) = parameters;
 
         var user = await userService.FindByEmailAsync(request.Login, cancellationToken);
         if (user == null)

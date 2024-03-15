@@ -1,18 +1,35 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Modules.Auth;
 
+public record RefreshTokenParameters
+{
+    public RefreshTokenRequest Request { get; init; } = default!;
+    public IUserService UserService { get; init; } = default!;
+    public ITokenService TokenService { get; init; } = default!;
+    public CancellationToken CancellationToken { get; init; } = default!;
+
+    public void Deconstruct(out RefreshTokenRequest request,
+        out IUserService userService,
+        out ITokenService tokenService,
+        out CancellationToken cancellationToken)
+    {
+        request = Request;
+        userService = UserService;
+        tokenService = TokenService;
+        cancellationToken = CancellationToken;
+    }
+}
+
 public static class RefreshTokenHandler
 {
-    public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> Handle
-        ([FromServices] IServiceProvider sp, RefreshTokenRequest request, CancellationToken cancellationToken)
+    public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> HandleAsync
+        ([AsParameters] RefreshTokenParameters parameters)
     {
-        var userService = sp.GetRequiredService<IUserService>();
-        var tokenService = sp.GetRequiredService<ITokenService>();
+        var (request, userService, tokenService, cancellationToken) = parameters;
 
         if (!tokenService.IsTokenValid(request.Token))
         {
@@ -20,9 +37,7 @@ public static class RefreshTokenHandler
         }
 
         ClaimsPrincipal principal = tokenService.ReadToken(request.Token);
-        string id = principal.Claims.Where(x => x.Type == ClaimTypes.NameIdentifier)
-            .Select(x => x.Value)
-            .FirstOrDefault() ?? string.Empty;
+        string id = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var user = await userService.FindByIdAsync(id, cancellationToken);
         if (user == null)
         {
