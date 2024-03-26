@@ -7,6 +7,7 @@ namespace Versus.Api.Data;
 public class VersusDbContext : IdentityDbContext<User, Role, Guid,
     UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
 {
+    public DbSet<UserRelationship> UserRelationships => Set<UserRelationship>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 

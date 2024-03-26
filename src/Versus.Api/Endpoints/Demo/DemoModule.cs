@@ -1,4 +1,4 @@
-﻿namespace Versus.Api.Modules.Demo;
+﻿namespace Versus.Api.Endpoints.Demo;
 
 [EndpointGroupName("Demo")]
 public class DemoModule : IModule

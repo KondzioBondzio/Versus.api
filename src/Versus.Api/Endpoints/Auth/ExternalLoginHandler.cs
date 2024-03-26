@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 public record ExternalLoginParameters
 {
@@ -26,7 +26,10 @@ public static class ExternalLoginHandler
 
         // TODO: use LinkGenerator to generate callback url
         string redirectUrl = $"api/auth/login/{scheme}/callback";
-        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        var properties = new AuthenticationProperties
+        {
+            RedirectUri = redirectUrl
+        };
 
         return scheme switch
         {

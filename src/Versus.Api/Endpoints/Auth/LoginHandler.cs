@@ -2,7 +2,7 @@
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 public record LoginParameters
 {
@@ -50,8 +50,7 @@ public static class LoginHandler
 
         return TypedResults.Ok(new LoginResponse
         {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
+            AccessToken = accessToken, RefreshToken = refreshToken
         });
     }
 }

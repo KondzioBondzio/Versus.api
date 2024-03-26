@@ -1,4 +1,4 @@
-﻿namespace Versus.Api.Modules;
+﻿namespace Versus.Api.Endpoints;
 
 public interface IModule
 {

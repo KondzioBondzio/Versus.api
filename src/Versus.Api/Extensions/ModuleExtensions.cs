@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Versus.Api.Modules;
+using Versus.Api.Endpoints;
 
 namespace Versus.Api.Extensions;
 

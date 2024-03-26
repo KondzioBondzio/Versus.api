@@ -4,7 +4,7 @@ using Versus.Api.Exceptions;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 public record RegisterParameters
 {
@@ -31,8 +31,7 @@ public static class RegisterHandler
 
         var user = new User
         {
-            UserName = request.Login,
-            Email = request.Email
+            UserName = request.Login, Email = request.Email
         };
 
         try

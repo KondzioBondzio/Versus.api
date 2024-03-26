@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 public record RefreshTokenParameters
 {
@@ -49,8 +49,7 @@ public static class RefreshTokenHandler
 
         return TypedResults.Ok(new RefreshTokenResponse
         {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
+            AccessToken = accessToken, RefreshToken = refreshToken
         });
     }
 }

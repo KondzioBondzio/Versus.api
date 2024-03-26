@@ -10,6 +10,7 @@ namespace Versus.Api.Tests.Auth;
 public class TokenServiceTest
 {
     private readonly JwtTokenService _tokenService;
+
     private readonly User _user = new()
     {
         Id = Guid.NewGuid(),
@@ -21,7 +22,8 @@ public class TokenServiceTest
     {
         var jwtConfiguration = new JwtTokenConfiguration
         {
-            Key = "OWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKO",
+            Key =
+                "OWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKOOWAFnYvWTHdlKGtaWGypUSgKO",
             Audience = "versus-api",
             Issuer = "versus"
         };

@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 public record ExternalLoginCallbackParameters
 {

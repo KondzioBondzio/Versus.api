@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Versus.Api.Modules.Demo;
+namespace Versus.Api.Endpoints.Demo;
 
 public record AuthorizeTestParameters
 {

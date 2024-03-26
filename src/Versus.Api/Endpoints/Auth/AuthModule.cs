@@ -1,6 +1,6 @@
 ﻿using Versus.Api.Services.Auth;
 
-namespace Versus.Api.Modules.Auth;
+namespace Versus.Api.Endpoints.Auth;
 
 [EndpointGroupName("Auth")]
 public class AuthModule : IModule
