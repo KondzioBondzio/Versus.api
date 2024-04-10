@@ -1,18 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿namespace Versus.Api.Entities;
 
-namespace Versus.Api.Entities;
-
-[Table("UserRelationships")]
 public class UserRelationship
 {
     public Guid Id { get; set; }
 
-    [ForeignKey(nameof(Permission))]
     public Guid UserId { get; set; }
-
     public virtual User User { get; set; } = null!;
 
-    [ForeignKey(nameof(Permission))]
     public Guid RelatedUserId { get; set; }
 
     public virtual User RelatedUser { get; set; } = null!;
