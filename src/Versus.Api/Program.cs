@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using FluentValidation;
+using Serilog;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
 using Versus.Api.Migrations;
@@ -12,6 +13,7 @@ builder.Host.AddLogging(builder.Configuration);
 builder.Services.AddSwagger();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentity(builder.Configuration);
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddVersusServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();

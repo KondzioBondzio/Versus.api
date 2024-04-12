@@ -19,7 +19,15 @@ public static class IdentityServiceExtensions
         //     options.SignIn.RequireConfirmedEmail = false;
         // });
 
-        services.AddIdentity<User, Role>()
+        services.AddIdentity<User, Role>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 0;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredUniqueChars = 0;
+            })
             .AddEntityFrameworkStores<VersusDbContext>();
 
         AuthenticationBuilder authenticationBuilder = services.AddAuthentication(IdentityConstants.BearerScheme)

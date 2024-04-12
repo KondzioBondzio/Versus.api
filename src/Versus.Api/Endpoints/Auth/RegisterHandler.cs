@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Versus.Api.Entities;
-using Versus.Api.Exceptions;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
@@ -8,14 +8,17 @@ namespace Versus.Api.Endpoints.Auth;
 
 public record RegisterParameters
 {
+    public IValidator<RegisterRequest> RequestValidator { get; init; } = default!;
     public RegisterRequest Request { get; init; } = default!;
     public IUserService UserService { get; init; } = default!;
     public CancellationToken CancellationToken { get; init; } = default!;
 
-    public void Deconstruct(out RegisterRequest request,
+    public void Deconstruct(out IValidator<RegisterRequest> requestValidator,
+        out RegisterRequest request,
         out IUserService userService,
         out CancellationToken cancellationToken)
     {
+        requestValidator = RequestValidator;
         request = Request;
         userService = UserService;
         cancellationToken = CancellationToken;
@@ -24,27 +27,23 @@ public record RegisterParameters
 
 public static class RegisterHandler
 {
-    public static async Task<Results<Ok, ProblemHttpResult>> HandleAsync
+    public static async Task<Results<Ok, ValidationProblem>> HandleAsync
         ([AsParameters] RegisterParameters parameters)
     {
-        var (request, userService, cancellationToken) = parameters;
+        var (validator, request, userService, cancellationToken) = parameters;
 
         var user = new User
         {
             UserName = request.Login, Email = request.Email
         };
 
-        try
+        var validationResult = await validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            await userService.CreateAsync(user, request.Password, cancellationToken);
+            return TypedResults.ValidationProblem(validationResult.ToDictionary());
         }
-        catch (ValidationException ex)
-        {
-            return TypedResults.Problem(
-                title: ex.Message,
-                detail: string.Join(Environment.NewLine, ex.ValidationErrors),
-                statusCode: StatusCodes.Status400BadRequest);
-        }
+
+        await userService.CreateAsync(user, request.Password, cancellationToken);
 
         return TypedResults.Ok();
     }
