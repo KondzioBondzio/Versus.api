@@ -16,4 +16,7 @@ public class ApiError
 
     [JsonPropertyName("detail")]
     public string Detail { get; set; } = string.Empty;
+
+    [JsonPropertyName("errors")]
+    public IDictionary<string, string[]> Errors { get; set; } = new Dictionary<string, string[]>();
 }
