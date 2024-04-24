@@ -21,8 +21,12 @@ public record ExternalLoginCallbackParameters
     }
 }
 
-public static class ExternalLoginCallbackHandler
+public class ExternalLoginCallbackHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapGet("/login/{scheme}/callback", HandleAsync)
+        .AllowAnonymous();
+    
     public static async Task<Results<ContentHttpResult, UnauthorizedHttpResult, NoContent>> HandleAsync
         ([AsParameters] ExternalLoginCallbackParameters parameters)
     {

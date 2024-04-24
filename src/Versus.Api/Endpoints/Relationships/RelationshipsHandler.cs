@@ -2,37 +2,38 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Versus.Api.Data;
+using Versus.Api.Extensions;
 using Versus.Shared.Relationships;
 
 namespace Versus.Api.Endpoints.Relationships;
 
 public record RelationshipsParameters
 {
-    public ClaimsPrincipal User { get; init; } = default!;
+    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
     public VersusDbContext DbContext { get; init; } = default!;
     public CancellationToken CancellationToken { get; init; } = default!;
 
-    public void Deconstruct(out ClaimsPrincipal user,
+    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
         out VersusDbContext dbContext,
         out CancellationToken cancellationToken)
     {
-        user = User;
+        claimsPrincipal = ClaimsPrincipal;
         dbContext = DbContext;
         cancellationToken = CancellationToken;
     }
 }
 
-public static class RelationshipsHandler
+public class RelationshipsHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapGet("/", HandleAsync);
+
     public static async Task<Results<Ok<IEnumerable<RelationshipDto>>, UnauthorizedHttpResult>> HandleAsync
         ([AsParameters] RelationshipsParameters parameters)
     {
-        var (user, dbContext, cancellationToken) = parameters;
+        var (claimsPrincipal, dbContext, cancellationToken) = parameters;
 
-        if (!Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
-        {
-            return TypedResults.Unauthorized();
-        }
+        var userId = claimsPrincipal.GetUserId();
 
         var relationships = await dbContext.UserRelationships
             .AsNoTracking()

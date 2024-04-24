@@ -17,8 +17,12 @@ public record ExternalLoginParameters
     }
 }
 
-public static class ExternalLoginHandler
+public class ExternalLoginHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapGet("/login/{scheme}", Handle)
+        .AllowAnonymous();
+
     public static ChallengeHttpResult Handle
         ([AsParameters] ExternalLoginParameters parameters)
     {

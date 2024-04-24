@@ -24,8 +24,12 @@ public record RefreshTokenParameters
     }
 }
 
-public static class RefreshTokenHandler
+public class RefreshTokenHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapPost("/refresh-token", HandleAsync)
+        .AllowAnonymous();
+
     public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> HandleAsync
         ([AsParameters] RefreshTokenParameters parameters)
     {

@@ -7,7 +7,7 @@ public static class DbContextServiceExtensions
 {
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<VersusDbContext>(options =>
+        services.AddDbContextPool<VersusDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Default"),
                 opt =>
                 {

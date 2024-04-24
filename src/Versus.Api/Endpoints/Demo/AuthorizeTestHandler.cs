@@ -6,19 +6,22 @@ namespace Versus.Api.Endpoints.Demo;
 
 public record AuthorizeTestParameters
 {
-    public ClaimsPrincipal User { get; init; } = default!;
+    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
     public CancellationToken CancellationToken { get; init; } = default!;
 
-    public void Deconstruct(out ClaimsPrincipal user,
+    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
         out CancellationToken cancellationToken)
     {
-        user = User;
+        claimsPrincipal = ClaimsPrincipal;
         cancellationToken = CancellationToken;
     }
 }
 
-public static class AuthorizeTestHandler
+public class AuthorizeTestHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapGet("/authorizeTest", Handle);
+
     public static Results<ContentHttpResult, UnauthorizedHttpResult> Handle
         ([AsParameters] AuthorizeTestParameters parameters)
     {

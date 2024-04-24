@@ -5,6 +5,7 @@ using Versus.Api.Extensions;
 using Versus.Api.Migrations;
 
 Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
     .CreateBootstrapLogger();
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,24 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddVersusServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
-builder.Services.RegisterModules();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(Environments.Development, policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+    options.AddPolicy(Environments.Production, policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 WebApplication app = builder.Build();
 
@@ -29,18 +47,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseExceptionHandler(_ => { });
+// order of items below does matter!
+// see: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-8.0#middleware-order
+if (app.Environment.IsProduction())
+{
+    app.UseExceptionHandler(_ => { });
+    app.UseHsts(); // do not ignore and allow users to bypass ssl certificate errors
+    app.UseHttpsRedirection(); // redirects all http requests to https
+}
 
+app.UseCors(app.Environment.EnvironmentName);
 app.UseAuthentication();
 app.UseAuthorization();
+
+// custom middleware
 
 app.MapEndpoints();
 
 try
 {
     using IServiceScope scope = app.Services.CreateScope();
-    IServiceProvider services = scope.ServiceProvider;
-    VersusMigrator migrator = services.GetRequiredService<VersusMigrator>();
+    var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
     await migrator.MigrateAsync();
 
     await app.RunAsync();

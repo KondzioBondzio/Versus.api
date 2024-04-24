@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Identity;
 using Versus.Api.Entities;
-using Versus.Api.Validation;
 
 namespace Versus.Api.Services.Auth;
 
@@ -31,12 +32,15 @@ public class EfUserService : IUserService
             return;
         }
 
-        ValidationState validationState = new();
+        var validationResult = new ValidationResult();
         foreach (var error in result.Errors)
         {
-            validationState.AddError(error.Code, error.Description);
+            validationResult.Errors.Add(new ValidationFailure(error.Code, error.Description));
         }
 
-        validationState.EnsureValid();
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
     }
 }

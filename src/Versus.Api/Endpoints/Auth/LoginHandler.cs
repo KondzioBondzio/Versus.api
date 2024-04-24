@@ -26,8 +26,12 @@ public record LoginParameters
     }
 }
 
-public static class LoginHandler
+public class LoginHandler : IEndpoint
 {
+    public static void Map(IEndpointRouteBuilder builder) => builder
+        .MapPost("/login", HandleAsync)
+        .AllowAnonymous();
+
     public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> HandleAsync
         ([AsParameters] LoginParameters parameters)
     {
