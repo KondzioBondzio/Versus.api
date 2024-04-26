@@ -3,6 +3,9 @@ using Serilog;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
 using Versus.Api.Migrations;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Versus.Api.Tests")]
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -64,15 +67,8 @@ app.UseAuthorization();
 
 app.MapEndpoints();
 
-try
-{
-    using IServiceScope scope = app.Services.CreateScope();
-    var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
-    await migrator.MigrateAsync();
+// using IServiceScope scope = app.Services.CreateScope();
+// var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
+// await migrator.MigrateAsync();
 
-    await app.RunAsync();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "Host terminated unexpectedly");
-}
+await app.RunAsync();

@@ -15,7 +15,7 @@ public static class LoggingServiceExtensions
         {
             config.ReadFrom.Configuration(configuration)
                 .ReadFrom.Services(services);
-        }, writeToProviders: true);
+        }, writeToProviders: true, preserveStaticLogger: true);
 
         return host;
     }
