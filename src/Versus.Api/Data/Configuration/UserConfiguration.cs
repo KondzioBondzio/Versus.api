@@ -9,6 +9,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
+        builder.HasIndex(x => x.UserName)
+            .IsUnique(false);
+        builder.HasIndex(x => x.NormalizedUserName)
+            .IsUnique(false);
+        builder.HasIndex(x => x.Email)
+            .IsUnique(false);
+        builder.HasIndex(x => x.NormalizedEmail)
+            .IsUnique(false);
 
         builder.HasMany(x => x.ChatMessages)
             .WithOne(x => x.User)

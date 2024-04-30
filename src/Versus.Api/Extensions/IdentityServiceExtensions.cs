@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Versus.Api.Data;
 using Versus.Api.Entities;
+using Versus.Api.Validation.Validators;
 
 namespace Versus.Api.Extensions;
 
@@ -29,6 +31,8 @@ public static class IdentityServiceExtensions
                 options.Password.RequiredUniqueChars = 0;
             })
             .AddEntityFrameworkStores<VersusDbContext>();
+
+        services.Replace(ServiceDescriptor.Scoped<IUserValidator<User>, IdentityUserValidator>());
 
         AuthenticationBuilder authenticationBuilder = services.AddAuthentication(IdentityConstants.BearerScheme)
             .AddBearerToken(IdentityConstants.BearerScheme);
