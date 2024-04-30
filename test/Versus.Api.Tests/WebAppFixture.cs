@@ -14,7 +14,7 @@ internal class WebAppFixture : WebApplicationFactory<Program>
 
         _ = builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<VersusDbContext>));
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(VersusDbContext));
             if (descriptor != null)
             {
                 services.Remove(descriptor);
