@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Versus.Api.Data;
@@ -11,6 +12,9 @@ internal class WebAppFixture : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
+        
+        var keepAliveConnection = new SqliteConnection("DataSource=:memory:");
+        keepAliveConnection.Open();
 
         _ = builder.ConfigureServices(services =>
         {
@@ -21,7 +25,7 @@ internal class WebAppFixture : WebApplicationFactory<Program>
             }
 
             services.AddDbContextPool<VersusDbContext>(options =>
-                options.UseSqlite("Data Source=versus_test.db"));
+                options.UseSqlite(keepAliveConnection));
 
 
             var sp = services.BuildServiceProvider();

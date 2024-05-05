@@ -4,6 +4,13 @@ namespace Versus.Api.Entities;
 
 public class User : IdentityUser<Guid>
 {
+    public byte[]? Image { get; set; }
+    public string? FirstName { get; set; }
+    public int YearOfBirth { get; set; }
+    public UserGender Gender { get; set; }
+    public string LanguageCode { get; set; }
+    public string City { get; set; }
+
     public virtual ICollection<RoomChatMessage> ChatMessages { get; set; } = new HashSet<RoomChatMessage>();
     public virtual ICollection<Room> HostedRooms { get; set; } = new HashSet<Room>();
     public virtual ICollection<UserNotification> Notifications { get; set; } = new HashSet<UserNotification>();

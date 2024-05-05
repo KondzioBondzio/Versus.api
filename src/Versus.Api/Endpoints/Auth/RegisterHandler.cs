@@ -37,7 +37,14 @@ public class RegisterHandler : IEndpoint
 
         var user = new User
         {
-            UserName = request.Login, Email = request.Email
+            UserName = request.Login,
+            Email = request.Login,
+            Image = request.Image,
+            FirstName = request.FirstName,
+            YearOfBirth = request.YearOfBirth,
+            Gender = (UserGender)request.Gender,
+            LanguageCode = request.Language,
+            City = request.City
         };
 
         try

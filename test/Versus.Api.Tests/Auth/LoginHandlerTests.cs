@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using FluentAssertions;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Tests.Auth;
@@ -7,16 +8,22 @@ namespace Versus.Api.Tests.Auth;
 public class LoginHandlerTests
 {
     [Theory]
-    [InlineData("demo@test.com", "Qwerty1!")]
+    [InlineData("demo1@test.com", "Qwerty1!")]
     public async Task LoginHandler_ShouldSucceed(string login, string password)
     {
         // Arrange
         await using var factory = new WebAppFixture();
         var client = factory.CreateClient();
 
-        await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest
+        _ = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest
         {
-            Email = login, Password = password, Login = login
+            Login = login,
+            Password = password,
+            UserName = "demo",
+            Gender = 0,
+            YearOfBirth = 2000,
+            City = "Warsaw",
+            Language = "pl"
         });
 
         // Act
@@ -26,12 +33,13 @@ public class LoginHandlerTests
         });
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        Assert.NotNull(result);
-        Assert.NotEmpty(result.TokenType);
-        Assert.NotEmpty(result.AccessToken);
-        Assert.NotEmpty(result.RefreshToken);
+        result.Should().NotBeNull();
+        result.Should().NotBe(string.Empty);
+        result!.TokenType.Should().NotBe(string.Empty);
+        result.AccessToken.Should().NotBe(string.Empty);
+        result.RefreshToken.Should().NotBe(string.Empty);
     }
 
     [Fact]
@@ -48,6 +56,6 @@ public class LoginHandlerTests
         });
 
         // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
     }
 }

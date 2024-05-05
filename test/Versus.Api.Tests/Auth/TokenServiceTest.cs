@@ -1,8 +1,8 @@
 using System.Security.Claims;
+using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Versus.Api.Configuration;
 using Versus.Api.Entities;
-using Versus.Api.Services;
 using Versus.Api.Services.Auth;
 
 namespace Versus.Api.Tests.Auth;
@@ -13,9 +13,7 @@ public class TokenServiceTest
 
     private readonly User _user = new()
     {
-        Id = Guid.NewGuid(),
-        UserName = "DemoUser",
-        Email = "DemoUser@versus.vs"
+        Id = Guid.NewGuid(), UserName = "demo", Email = "demo@test.com"
     };
 
     public TokenServiceTest()
@@ -35,16 +33,16 @@ public class TokenServiceTest
     public void GenerateAccessTokenSuccess()
     {
         string token = _tokenService.GenerateAccessToken(_user);
-        Assert.NotNull(token);
-        Assert.NotEqual(string.Empty, token);
+        token.Should().NotBeNull();
+        token.Should().NotBe(string.Empty);
     }
 
     [Fact]
     public void GenerateRefreshTokenSuccess()
     {
         string token = _tokenService.GenerateAccessToken(_user);
-        Assert.NotNull(token);
-        Assert.NotEqual(string.Empty, token);
+        token.Should().NotBeNull();
+        token.Should().NotBe(string.Empty);
     }
 
     [Fact]
@@ -56,6 +54,6 @@ public class TokenServiceTest
             .Where(x => x.Type == ClaimTypes.NameIdentifier)
             .Select(x => x.Value)
             .First();
-        Assert.Equal(_user.Id, Guid.Parse(id));
+        id.Should().Be(_user.Id.ToString());
     }
 }

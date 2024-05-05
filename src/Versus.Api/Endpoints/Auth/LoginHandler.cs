@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Versus.Api.Extensions;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
@@ -30,7 +31,8 @@ public class LoginHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/login", HandleAsync)
-        .AllowAnonymous();
+        .AllowAnonymous()
+        .WithRequestValidation<LoginParameters, LoginRequest>();
 
     public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> HandleAsync
         ([AsParameters] LoginParameters parameters)

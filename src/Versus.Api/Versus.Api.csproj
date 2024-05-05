@@ -47,8 +47,4 @@
     <ProjectReference Include="..\Versus.Shared\Versus.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validation\Rules\" />
-  </ItemGroup>
-
 </Project>
