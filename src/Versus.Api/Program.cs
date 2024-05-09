@@ -2,7 +2,6 @@
 using Serilog;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
-using Versus.Api.Migrations;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Versus.Api.Tests")]
@@ -18,6 +17,7 @@ builder.Services.AddSwagger();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddVersusFeatureManagement();
 builder.Services.AddVersusServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
