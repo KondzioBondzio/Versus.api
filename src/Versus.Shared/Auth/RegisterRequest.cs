@@ -1,4 +1,6 @@
-﻿namespace Versus.Shared.Auth;
+﻿using Versus.Shared.Enums;
+
+namespace Versus.Shared.Auth;
 
 public record RegisterRequest
 {
@@ -14,5 +16,4 @@ public record RegisterRequest
 
     public required string Language { get; init; }
     public required string City { get; init; }
-    public string Email { get; set; }
 }
