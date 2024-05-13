@@ -1,0 +1,3 @@
+[submodule "src/Versus.Shared"]
+	path = src/Versus.Shared
+	url = https://github.com/KondzioBondzio/Versus.Shared

@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Versus.Shared", "src\Versus.Shared\Versus.Shared.csproj", "{A2CE7202-73F7-4B74-B4BF-57305C18A860}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D0D39B60-6A58-4969-940A-5B946C7E97D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Versus.Api.Tests", "test\Versus.Api.Tests\Versus.Api.Tests.csproj", "{7AA08962-F965-4AC0-BDFE-872F185F0D87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Versus.Shared", "src\Versus.Shared\src\Versus.Shared\Versus.Shared.csproj", "{67F260C5-7D15-409A-B1E8-CCFCB7795179}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,18 +31,18 @@ Global
 		{C038A8BB-165C-44B8-8D7B-7C16F219047F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C038A8BB-165C-44B8-8D7B-7C16F219047F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C038A8BB-165C-44B8-8D7B-7C16F219047F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A2CE7202-73F7-4B74-B4BF-57305C18A860}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2CE7202-73F7-4B74-B4BF-57305C18A860}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2CE7202-73F7-4B74-B4BF-57305C18A860}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2CE7202-73F7-4B74-B4BF-57305C18A860}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7AA08962-F965-4AC0-BDFE-872F185F0D87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7AA08962-F965-4AC0-BDFE-872F185F0D87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AA08962-F965-4AC0-BDFE-872F185F0D87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AA08962-F965-4AC0-BDFE-872F185F0D87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67F260C5-7D15-409A-B1E8-CCFCB7795179}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67F260C5-7D15-409A-B1E8-CCFCB7795179}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67F260C5-7D15-409A-B1E8-CCFCB7795179}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67F260C5-7D15-409A-B1E8-CCFCB7795179}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C038A8BB-165C-44B8-8D7B-7C16F219047F} = {4019B804-5325-4791-864B-2EB6B995D3B6}
-		{A2CE7202-73F7-4B74-B4BF-57305C18A860} = {4019B804-5325-4791-864B-2EB6B995D3B6}
 		{7AA08962-F965-4AC0-BDFE-872F185F0D87} = {D0D39B60-6A58-4969-940A-5B946C7E97D6}
+		{67F260C5-7D15-409A-B1E8-CCFCB7795179} = {4019B804-5325-4791-864B-2EB6B995D3B6}
 	EndGlobalSection
 EndGlobal
