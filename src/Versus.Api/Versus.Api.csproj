@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FluentValidation" Version="11.9.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="8.0.4" />
@@ -46,6 +47,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Versus.Shared\src\Versus.Shared\Versus.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Endpoints\Chats\" />
+    <Folder Include="Endpoints\Teams\" />
+    <Folder Include="Logs\" />
   </ItemGroup>
 
 </Project>
