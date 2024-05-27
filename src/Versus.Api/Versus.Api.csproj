@@ -53,6 +53,7 @@
     <Folder Include="Endpoints\Chats\" />
     <Folder Include="Endpoints\Teams\" />
     <Folder Include="Logs\" />
+    <Folder Include="Mapping\" />
   </ItemGroup>
 
 </Project>
