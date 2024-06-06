@@ -4,6 +4,8 @@ namespace Versus.Api.Entities;
 
 public class User : IdentityUser<Guid>
 {
+    public new string UserName { get; set; }
+
     public byte[]? Image { get; set; }
     public string? FirstName { get; set; }
     public int YearOfBirth { get; set; }

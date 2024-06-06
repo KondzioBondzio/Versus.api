@@ -8,35 +8,18 @@ using Versus.Shared.Relationships;
 
 namespace Versus.Api.Endpoints.Relationships;
 
-public record UnblockParameters
-{
-    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
-    public UnblockRequest Request { get; init; } = default!;
-    public VersusDbContext DbContext { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
-        out UnblockRequest request,
-        out VersusDbContext dbContext,
-        out CancellationToken cancellationToken)
-    {
-        claimsPrincipal = ClaimsPrincipal;
-        request = Request;
-        dbContext = DbContext;
-        cancellationToken = CancellationToken;
-    }
-}
-
-public class UnblockHandler : IEndpoint
+public class UnblockRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapPost("/unblock", HandleAsync);
+        .MapPost("/unblock", HandleAsync)
+        .WithRequestValidation<UnblockFriendshipRequest>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync
-        ([AsParameters] UnblockParameters parameters)
+    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+        UnblockFriendshipRequest friendshipRequest,
+        ClaimsPrincipal claimsPrincipal,
+        VersusDbContext dbContext,
+        CancellationToken cancellationToken)
     {
-        var (claimsPrincipal, request, dbContext, cancellationToken) = parameters;
-
         var userId = claimsPrincipal.GetUserId();
 
         var relationship = await dbContext.UserRelationships
@@ -44,7 +27,7 @@ public class UnblockHandler : IEndpoint
             .Where(x => x.Type == UserRelationshipType.Block
                         && x.Status == UserRelationshipStatus.Accepted
                         && (x.UserId == userId || x.RelatedUserId == userId)
-                        && (x.UserId == request.Id || x.RelatedUserId == request.Id))
+                        && (x.UserId == friendshipRequest.Id || x.RelatedUserId == friendshipRequest.Id))
             .SingleOrDefaultAsync(cancellationToken);
         if (relationship == null)
         {

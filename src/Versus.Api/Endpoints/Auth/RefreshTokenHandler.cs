@@ -1,40 +1,24 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Versus.Api.Extensions;
 using Versus.Api.Services.Auth;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Endpoints.Auth;
 
-public record RefreshTokenParameters
-{
-    public RefreshTokenRequest Request { get; init; } = default!;
-    public IUserService UserService { get; init; } = default!;
-    public ITokenService TokenService { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out RefreshTokenRequest request,
-        out IUserService userService,
-        out ITokenService tokenService,
-        out CancellationToken cancellationToken)
-    {
-        request = Request;
-        userService = UserService;
-        tokenService = TokenService;
-        cancellationToken = CancellationToken;
-    }
-}
-
 public class RefreshTokenHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/refresh-token", HandleAsync)
-        .AllowAnonymous();
+        .AllowAnonymous()
+        .WithRequestValidation<RefreshTokenRequest>();
 
-    public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> HandleAsync
-        ([AsParameters] RefreshTokenParameters parameters)
+    public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> HandleAsync(
+        RefreshTokenRequest request,
+        IUserService userService,
+        ITokenService tokenService,
+        CancellationToken cancellationToken)
     {
-        var (request, userService, tokenService, cancellationToken) = parameters;
-
         if (!tokenService.IsTokenValid(request.Token))
         {
             return TypedResults.Unauthorized();

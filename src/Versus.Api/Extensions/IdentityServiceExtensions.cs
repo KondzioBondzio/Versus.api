@@ -21,7 +21,7 @@ public static class IdentityServiceExtensions
         //     options.SignIn.RequireConfirmedEmail = false;
         // });
 
-        services.AddIdentity<User, Role>(options =>
+        services.AddIdentityCore<User>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 0;
@@ -30,16 +30,16 @@ public static class IdentityServiceExtensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredUniqueChars = 0;
             })
+            .AddRoles<Role>()
+            .AddSignInManager()
             .AddEntityFrameworkStores<VersusDbContext>();
 
         services.Replace(ServiceDescriptor.Scoped<IUserValidator<User>, IdentityUserValidator>());
 
-        AuthenticationBuilder authenticationBuilder = services.AddAuthentication(IdentityConstants.BearerScheme)
-            .AddBearerToken(IdentityConstants.BearerScheme);
-        AuthorizationPolicyBuilder policyBuilder = new(IdentityConstants.BearerScheme);
+        var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
         const string jwtBearerConfig = "Authentication:Schemes:JwtBearer";
-        authenticationBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
+        authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
             options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -54,25 +54,23 @@ public static class IdentityServiceExtensions
                     ClockSkew = TimeSpan.Zero
                 };
             });
-        policyBuilder.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
 
         const string keyCloakConfig = "Authentication:Schemes:KeyCloak";
         if (IsSectionConfigured(configuration.GetSection(keyCloakConfig)))
         {
-            authenticationBuilder.AddJwtBearer("KeyCloak", options =>
+            authBuilder.AddJwtBearer("KeyCloak", options =>
             {
                 options.RequireHttpsMetadata = false;
                 options.MetadataAddress = configuration[$"{keyCloakConfig}:MetadataAddress"]!;
                 options.Authority = configuration[$"{keyCloakConfig}:Authority"];
                 options.Audience = configuration[$"{keyCloakConfig}:Audience"];
             });
-            policyBuilder.AddAuthenticationSchemes("KeyCloak");
         }
 
         const string googleConfig = "Authentication:Schemes:Google";
         if (IsSectionConfigured(configuration.GetSection(googleConfig)))
         {
-            authenticationBuilder.AddGoogle(options =>
+            authBuilder.AddGoogle(options =>
             {
                 options.Events.OnRedirectToAuthorizationEndpoint = context =>
                 {
@@ -91,12 +89,15 @@ public static class IdentityServiceExtensions
                 options.ClientId = configuration[$"{googleConfig}:ClientId"]!;
                 options.ClientSecret = configuration[$"{googleConfig}:ClientSecret"]!;
             });
-            policyBuilder.AddAuthenticationSchemes(GoogleDefaults.AuthenticationScheme);
         }
 
-        AuthorizationPolicy policy = policyBuilder.RequireAuthenticatedUser().Build();
+        AuthorizationPolicy policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, "KeyCloak", GoogleDefaults.AuthenticationScheme)
+            .Build();
         services.AddAuthorizationBuilder()
-            .SetDefaultPolicy(policy);
+            .SetDefaultPolicy(policy)
+            .AddPolicy("xdd", policy);
 
         return services;
     }

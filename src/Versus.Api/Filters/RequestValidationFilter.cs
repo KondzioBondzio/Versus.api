@@ -2,8 +2,7 @@
 
 namespace Versus.Api.Filters;
 
-public class RequestValidationFilter<TArguments, TRequest>(IValidator<TRequest>? validator = null) : IEndpointFilter
-    where TArguments : class
+public class RequestValidationFilter<TRequest>(IValidator<TRequest>? validator = null) : IEndpointFilter
     where TRequest : class
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
@@ -13,11 +12,7 @@ public class RequestValidationFilter<TArguments, TRequest>(IValidator<TRequest>?
             return await next(context);
         }
 
-        var args = context.Arguments.OfType<TArguments>().First();
-        var request = args!.GetType()
-            .GetProperties()
-            .First(x => x.PropertyType == typeof(TRequest))
-            .GetValue(args) as TRequest;
+        var request = context.Arguments.OfType<TRequest>().First();
         var validationResult = await validator.ValidateAsync(request!, context.HttpContext.RequestAborted);
         if (!validationResult.IsValid)
         {

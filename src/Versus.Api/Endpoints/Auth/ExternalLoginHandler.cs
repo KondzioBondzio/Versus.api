@@ -4,30 +4,16 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Versus.Api.Endpoints.Auth;
 
-public record ExternalLoginParameters
-{
-    public string Scheme { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out string scheme,
-        out CancellationToken cancellationToken)
-    {
-        scheme = Scheme;
-        cancellationToken = CancellationToken;
-    }
-}
-
 public class ExternalLoginHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/login/{scheme}", Handle)
         .AllowAnonymous();
 
-    public static ChallengeHttpResult Handle
-        ([AsParameters] ExternalLoginParameters parameters)
+    public static ChallengeHttpResult Handle(
+        string scheme,
+        CancellationToken cancellationToken)
     {
-        var (scheme, _) = parameters;
-
         // TODO: use LinkGenerator to generate callback url
         string redirectUrl = $"api/auth/login/{scheme}/callback";
         var properties = new AuthenticationProperties

@@ -8,35 +8,18 @@ using Versus.Shared.Relationships;
 
 namespace Versus.Api.Endpoints.Relationships;
 
-public record UnfriendParameters
-{
-    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
-    public UnfriendRequest Request { get; init; } = default!;
-    public VersusDbContext DbContext { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
-        out UnfriendRequest request,
-        out VersusDbContext dbContext,
-        out CancellationToken cancellationToken)
-    {
-        claimsPrincipal = ClaimsPrincipal;
-        request = Request;
-        dbContext = DbContext;
-        cancellationToken = CancellationToken;
-    }
-}
-
-public class UnfriendHandler : IEndpoint
+public class RemoveFriendRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapPost("/unfriend", HandleAsync);
+        .MapPost("/unfriend", HandleAsync)
+        .WithRequestValidation<RemoveFriendRelationshipRequest>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync
-        ([AsParameters] UnfriendParameters parameters)
+    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+        RemoveFriendRelationshipRequest request,
+        ClaimsPrincipal claimsPrincipal,
+        VersusDbContext dbContext,
+        CancellationToken cancellationToken)
     {
-        var (claimsPrincipal, request, dbContext, cancellationToken) = parameters;
-
         var userId = claimsPrincipal.GetUserId();
 
         var relationship = await dbContext.UserRelationships

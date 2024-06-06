@@ -11,8 +11,11 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.ToTable("Rooms");
 
         builder.Property(x => x.Name)
-            .HasMaxLength(50)
+            .HasMaxLength(64)
             .IsRequired();
+
+        builder.Property(x => x.Password)
+            .HasMaxLength(32);
 
         builder.HasOne(x => x.Category)
             .WithMany(x => x.Rooms)
@@ -33,7 +36,7 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
             .WithOne(x => x.Room)
             .HasForeignKey(x => x.RoomId)
             .IsRequired();
-        
+
         builder.HasMany(x => x.ChatMessages)
             .WithOne(x => x.Room)
             .HasForeignKey(x => x.RoomId)

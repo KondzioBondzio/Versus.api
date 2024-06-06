@@ -9,6 +9,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
+
+        builder.Property(x => x.UserName)
+            .HasMaxLength(32)
+            .IsRequired();
+        builder.Property(x => x.Email)
+            .HasMaxLength(254)
+            .IsRequired();
+
         builder.HasIndex(x => x.UserName)
             .IsUnique(false);
         builder.HasIndex(x => x.NormalizedUserName)
@@ -42,7 +50,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .IsRequired();
-        
+
         builder.HasMany(x => x.RelatedTo)
             .WithOne(x => x.RelatedUser)
             .HasForeignKey(x => x.RelatedUserId)

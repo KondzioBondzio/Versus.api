@@ -4,12 +4,11 @@ namespace Versus.Api.Extensions;
 
 public static class RouteHandlerBuilderValidationExtensions
 {
-    public static RouteHandlerBuilder WithRequestValidation<TArgument, TRequest>(this RouteHandlerBuilder builder)
-        where TArgument : class
+    public static RouteHandlerBuilder WithRequestValidation<TRequest>(this RouteHandlerBuilder builder)
         where TRequest : class
     {
         return builder
-            .AddEndpointFilter<RequestValidationFilter<TArgument, TRequest>>()
+            .AddEndpointFilter<RequestValidationFilter<TRequest>>()
             .ProducesValidationProblem();
     }
 }

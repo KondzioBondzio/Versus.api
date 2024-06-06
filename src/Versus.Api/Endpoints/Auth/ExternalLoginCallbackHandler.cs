@@ -2,37 +2,24 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Versus.Api.Entities;
+using Versus.Api.Services.Auth;
 
 namespace Versus.Api.Endpoints.Auth;
-
-public record ExternalLoginCallbackParameters
-{
-    public HttpContext HttpContext { get; init; } = default!;
-    public string Scheme { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out HttpContext httpContext,
-        out string scheme,
-        out CancellationToken cancellationToken)
-    {
-        httpContext = HttpContext;
-        scheme = Scheme;
-        cancellationToken = CancellationToken;
-    }
-}
 
 public class ExternalLoginCallbackHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/login/{scheme}/callback", HandleAsync)
         .AllowAnonymous();
-    
-    public static async Task<Results<ContentHttpResult, UnauthorizedHttpResult, NoContent>> HandleAsync
-        ([AsParameters] ExternalLoginCallbackParameters parameters)
+
+    public static async Task<Results<ContentHttpResult, UnauthorizedHttpResult, NoContent>> HandleAsync(
+        string scheme,
+        HttpContext httpContext,
+        ITokenService tokenService,
+        CancellationToken cancellationToken)
     {
         // TODO: Handle external login callback, including creating a local user if necessary
-
-        var (httpContext, scheme, _) = parameters;
 
         var auth = await httpContext.AuthenticateAsync(scheme);
         if (!auth.Succeeded || auth.Principal == null)
@@ -47,6 +34,15 @@ public class ExternalLoginCallbackHandler : IEndpoint
         stringBuilder.AppendLine($"IsAuthenticated: {auth.Principal.Identity?.IsAuthenticated ?? false}");
         stringBuilder.AppendLine($"Id: {id}");
         stringBuilder.AppendLine($"Email: {email}");
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(), UserName = email, Email = email
+        };
+        string accessToken = tokenService.GenerateAccessToken(user);
+        string refreshToken = tokenService.GenerateRefreshToken(user);
+        stringBuilder.AppendLine($"Access Token: {accessToken}");
+        stringBuilder.AppendLine($"Refresh Token: {refreshToken}");
 
         return TypedResults.Content(stringBuilder.ToString());
     }

@@ -8,39 +8,22 @@ using Versus.Shared.Relationships;
 
 namespace Versus.Api.Endpoints.Relationships;
 
-public record DeclineParameters
-{
-    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
-    public DeclineRequest Request { get; init; } = default!;
-    public VersusDbContext DbContext { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
-        out DeclineRequest request,
-        out VersusDbContext dbContext,
-        out CancellationToken cancellationToken)
-    {
-        claimsPrincipal = ClaimsPrincipal;
-        request = Request;
-        dbContext = DbContext;
-        cancellationToken = CancellationToken;
-    }
-}
-
-public class DeclineHandler : IEndpoint
+public class DeclineRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapPost("/decline", HandleAsync);
+        .MapPost("/decline", HandleAsync)
+        .WithRequestValidation<BlockRelationshipRequest>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync
-        ([AsParameters] DeclineParameters parameters)
+    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+        DeclineRelationshipRequest relationshipRequest,
+        ClaimsPrincipal claimsPrincipal,
+        VersusDbContext dbContext,
+        CancellationToken cancellationToken)
     {
-        var (claimsPrincipal, request, dbContext, cancellationToken) = parameters;
-
         var userId = claimsPrincipal.GetUserId();
 
         var relationship = await dbContext.UserRelationships
-            .Where(x => x.Id == request.Id
+            .Where(x => x.Id == relationshipRequest.Id
                         && x.Status == UserRelationshipStatus.Pending
                         && x.RelatedUserId == userId)
             .SingleOrDefaultAsync(cancellationToken);

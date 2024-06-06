@@ -8,40 +8,23 @@ using Versus.Shared.Relationships;
 
 namespace Versus.Api.Endpoints.Relationships;
 
-public record BlockParameters
-{
-    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
-    public BlockRequest Request { get; init; } = default!;
-    public VersusDbContext DbContext { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
-        out BlockRequest request,
-        out VersusDbContext dbContext,
-        out CancellationToken cancellationToken)
-    {
-        claimsPrincipal = ClaimsPrincipal;
-        request = Request;
-        dbContext = DbContext;
-        cancellationToken = CancellationToken;
-    }
-}
-
-public class BlockHandler : IEndpoint
+public class BlockRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapPost("/block", HandleAsync);
+        .MapPost("/block", HandleAsync)
+        .WithRequestValidation<BlockRelationshipRequest>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync
-        ([AsParameters] BlockParameters parameters)
+    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+        BlockRelationshipRequest relationshipRequest,
+        ClaimsPrincipal claimsPrincipal,
+        VersusDbContext dbContext,
+        CancellationToken cancellationToken)
     {
-        var (claimsPrincipal, request, dbContext, cancellationToken) = parameters;
-
         var userId = claimsPrincipal.GetUserId();
 
         bool receiver = await dbContext.Users
             .AsNoTracking()
-            .Where(x => x.Id == request.Id)
+            .Where(x => x.Id == relationshipRequest.Id)
             .AnyAsync(cancellationToken);
         if (!receiver)
         {
@@ -54,7 +37,7 @@ public class BlockHandler : IEndpoint
         var relationship = await dbContext.UserRelationships
             .AsNoTracking()
             .Where(x => (x.UserId == userId || x.RelatedUserId == userId)
-                        && (x.UserId == request.Id || x.RelatedUserId == request.Id))
+                        && (x.UserId == relationshipRequest.Id || x.RelatedUserId == relationshipRequest.Id))
             .SingleOrDefaultAsync(cancellationToken);
         if (relationship is { Type: UserRelationshipType.Block, Status: UserRelationshipStatus.Accepted })
         {
@@ -69,7 +52,7 @@ public class BlockHandler : IEndpoint
         relationship = new UserRelationship
         {
             UserId = userId,
-            RelatedUserId = request.Id,
+            RelatedUserId = relationshipRequest.Id,
             Type = UserRelationshipType.Block,
             Status = UserRelationshipStatus.Accepted,
             Timestamp = TimeProvider.System.GetUtcNow().UtcDateTime
