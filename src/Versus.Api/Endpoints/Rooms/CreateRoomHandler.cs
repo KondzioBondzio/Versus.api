@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Versus.Api.Data;
 using Versus.Api.Entities;
 using Versus.Api.Extensions;
@@ -13,13 +14,27 @@ public class CreateRoomHandler : IEndpoint
         .MapPost("/", HandleAsync)
         .WithRequestValidation<CreateRoomRequest>();
 
-    public static async Task<Results<Created, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<Results<Created, ValidationProblem, UnauthorizedHttpResult>> HandleAsync(
         CreateRoomRequest request,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
         CancellationToken cancellationToken)
     {
         var userId = claimsPrincipal.GetUserId();
+
+        // TODO: refactor
+        var categoryExists = await dbContext.Categories
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == request.CategoryId, cancellationToken: cancellationToken);
+        if (!categoryExists)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                {
+                    nameof(request.CategoryId), [$"Category with id {request.CategoryId} does not exist"]
+                }
+            });
+        }
 
         var room = new Room
         {
