@@ -12,9 +12,12 @@ public class OfferFriendRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/friend", HandleAsync)
-        .WithRequestValidation<OfferFriendRelationshipRequest>();
+        .WithRequestValidation<OfferFriendRelationshipRequest>()
+        .Produces<Ok>()
+        .Produces<NotFound>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         OfferFriendRelationshipRequest request,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
@@ -28,10 +31,7 @@ public class OfferFriendRelationshipHandler : IEndpoint
             .AnyAsync(cancellationToken);
         if (!receiver)
         {
-            return TypedResults.Problem(
-                title: "User not found",
-                detail: "UserNotFound",
-                statusCode: StatusCodes.Status400BadRequest);
+            return TypedResults.NotFound();
         }
 
         var relationship = await dbContext.UserRelationships

@@ -3,19 +3,18 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Versus.Api.Data;
-using Versus.Api.Entities;
 using Versus.Api.Extensions;
-using Versus.Shared.Common;
+using Versus.Shared.Rooms;
 
-namespace Versus.Api.Endpoints.Categories;
+namespace Versus.Api.Endpoints.Rooms;
 
-public class DeleteCategoryHandler : IEndpoint
+public class DeleteRoomHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapDelete("/{id:guid}", HandleAsync)
+        .WithRequestValidation<GetRoomsRequest>()
         .Produces<NoContent>()
         .Produces<NotFound>()
-        .Produces<Conflict<ConflictResponse>>()
         .Produces<UnauthorizedHttpResult>()
         .Produces<ForbidHttpResult>();
 
@@ -27,18 +26,28 @@ public class DeleteCategoryHandler : IEndpoint
     {
         var userId = claimsPrincipal.GetUserId();
 
-        var exists = await dbContext.Categories.AnyAsync(x => x.Id == id, cancellationToken);
-        if (!exists)
+        var room = await dbContext.Rooms
+            .Include(x => x.Users)
+            .Include(x => x.Teams)
+            .ThenInclude(x => x.Users)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (room == null)
         {
             return TypedResults.NotFound();
         }
 
-        var category = new Category
+        if (room.HostId != userId)
         {
-            Id = id
-        };
-        dbContext.Categories.Attach(category);
-        dbContext.Categories.Remove(category);
+            return TypedResults.Forbid();
+        }
+
+        // TODO: Refactor
+        dbContext.RoomChatMessages.RemoveRange(room.ChatMessages);
+        dbContext.TeamUsers.RemoveRange(room.Teams.SelectMany(x => x.Users));
+        dbContext.Teams.RemoveRange(room.Teams);
+        dbContext.RoomUsers.RemoveRange(room.Users);
+        dbContext.Rooms.Remove(room);
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return TypedResults.NoContent();

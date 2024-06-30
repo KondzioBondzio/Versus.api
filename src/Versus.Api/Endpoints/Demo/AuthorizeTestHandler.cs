@@ -4,38 +4,26 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Versus.Api.Endpoints.Demo;
 
-public record AuthorizeTestParameters
-{
-    public ClaimsPrincipal ClaimsPrincipal { get; init; } = default!;
-    public CancellationToken CancellationToken { get; init; } = default!;
-
-    public void Deconstruct(out ClaimsPrincipal claimsPrincipal,
-        out CancellationToken cancellationToken)
-    {
-        claimsPrincipal = ClaimsPrincipal;
-        cancellationToken = CancellationToken;
-    }
-}
-
 public class AuthorizeTestHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapGet("/authorizeTest", Handle);
+        .MapGet("/authorizeTest", Handle)
+        .Produces<ContentHttpResult>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static Results<ContentHttpResult, UnauthorizedHttpResult> Handle
-        ([AsParameters] AuthorizeTestParameters parameters)
+    public static IResult Handle(ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken)
     {
-        var (user, _) = parameters;
-        if (!user.Identity?.IsAuthenticated ?? false)
+        var identity = claimsPrincipal.Identity;
+        if (!identity?.IsAuthenticated ?? false)
         {
             return TypedResults.Unauthorized();
         }
 
-        string? id = user.FindFirstValue(ClaimTypes.NameIdentifier);
-        string? email = user.FindFirstValue(ClaimTypes.Email);
+        string? id = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? email = claimsPrincipal.FindFirstValue(ClaimTypes.Email);
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"IsAuthenticated: {user.Identity?.IsAuthenticated ?? false}");
+        stringBuilder.AppendLine($"IsAuthenticated: {identity?.IsAuthenticated ?? false}");
         stringBuilder.AppendLine($"Id: {id}");
         stringBuilder.AppendLine($"Email: {email}");
 

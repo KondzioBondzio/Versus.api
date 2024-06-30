@@ -1,41 +1,46 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Versus.Api.Data;
-using Versus.Api.Entities;
 using Versus.Api.Extensions;
 using Versus.Shared.Categories;
 
 namespace Versus.Api.Endpoints.Categories;
 
-public class CreateCategoryHandler : IEndpoint
+public class UpdateCategoryHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
-        .MapPost("/", HandleAsync)
+        .MapPut("/{id:guid}", HandleAsync)
         .WithRequestValidation<CreateCategoryRequest>()
-        .Produces<Created>()
+        .Produces<NoContent>()
+        .Produces<NotFound>()
         .Produces<ValidationProblem>()
         .Produces<UnauthorizedHttpResult>()
         .Produces<ForbidHttpResult>();
 
     public static async Task<IResult> HandleAsync(
-        CreateCategoryRequest request,
+        [FromRoute] Guid id,
+        [FromBody] UpdateCategoryRequest request,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
         CancellationToken cancellationToken)
     {
         var userId = claimsPrincipal.GetUserId();
 
-        var category = new Category
+        var category = await dbContext.Categories
+            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (category == null)
         {
-            Name = request.Name,
-            Description = request.Description,
-            Image = request.Image
-        };
+            return TypedResults.NotFound();
+        }
 
-        await dbContext.Categories.AddAsync(category, cancellationToken);
+        category.Name = request.Name;
+        category.Description = request.Description;
+        category.Image = request.Image;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // TODO: Return result?
-        return TypedResults.Created();
+        return TypedResults.NoContent();
     }
 }

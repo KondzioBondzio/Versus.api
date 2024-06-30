@@ -14,13 +14,15 @@ public class GetCategoriesHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/", HandleAsync)
-        .WithRequestValidation<GetCategoriesRequest>();
+        .WithRequestValidation<GetCategoriesRequest>()
+        .Produces<Ok<PagedResponse<GetCategoriesResponse>>>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok<PagedResponse<GetCategoriesResponse>>, ProblemHttpResult, UnauthorizedHttpResult>>
-        HandleAsync([AsParameters] GetCategoriesRequest request,
-            ClaimsPrincipal claimsPrincipal,
-            VersusDbContext dbContext,
-            CancellationToken cancellationToken)
+    public static async Task<IResult> HandleAsync(
+        [AsParameters] GetCategoriesRequest request,
+        ClaimsPrincipal claimsPrincipal,
+        VersusDbContext dbContext,
+        CancellationToken cancellationToken)
     {
         var userId = claimsPrincipal.GetUserId();
 

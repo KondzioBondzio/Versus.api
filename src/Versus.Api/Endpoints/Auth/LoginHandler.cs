@@ -10,9 +10,11 @@ public class LoginHandler : IEndpoint
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/login", HandleAsync)
         .AllowAnonymous()
-        .WithRequestValidation<LoginRequest>();
+        .WithRequestValidation<LoginRequest>()
+        .Produces<Ok<LoginResponse>>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         LoginRequest request,
         IAuthService authService,
         ITokenService tokenService,

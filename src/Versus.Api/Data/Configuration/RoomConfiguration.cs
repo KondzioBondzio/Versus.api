@@ -13,6 +13,10 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.Property(x => x.Name)
             .HasMaxLength(64)
             .IsRequired();
+        
+        builder.Property(x => x.Description)
+            .HasMaxLength(8192)
+            .IsRequired();
 
         builder.Property(x => x.Password)
             .HasMaxLength(32);

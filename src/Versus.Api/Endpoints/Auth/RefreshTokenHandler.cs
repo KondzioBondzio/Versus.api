@@ -11,9 +11,11 @@ public class RefreshTokenHandler : IEndpoint
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/refresh-token", HandleAsync)
         .AllowAnonymous()
-        .WithRequestValidation<RefreshTokenRequest>();
+        .WithRequestValidation<RefreshTokenRequest>()
+        .Produces<Ok<RefreshTokenResponse>>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok<RefreshTokenResponse>, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         RefreshTokenRequest request,
         IUserService userService,
         ITokenService tokenService,

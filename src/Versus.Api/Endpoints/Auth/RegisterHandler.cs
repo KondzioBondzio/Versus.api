@@ -12,9 +12,11 @@ public class RegisterHandler : IEndpoint
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/register", HandleAsync)
         .AllowAnonymous()
-        .WithRequestValidation<RegisterRequest>();
+        .WithRequestValidation<RegisterRequest>()
+        .Produces<Ok>()
+        .Produces<ValidationProblem>();
 
-    public static async Task<Results<Ok, ValidationProblem>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         RegisterRequest request,
         IUserService userService,
         CancellationToken cancellationToken)

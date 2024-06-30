@@ -12,9 +12,12 @@ public class UnblockRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/unblock", HandleAsync)
-        .WithRequestValidation<UnblockFriendshipRequest>();
+        .WithRequestValidation<UnblockFriendshipRequest>()
+        .Produces<Ok>()
+        .Produces<NotFound>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         UnblockFriendshipRequest friendshipRequest,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
@@ -31,10 +34,7 @@ public class UnblockRelationshipHandler : IEndpoint
             .SingleOrDefaultAsync(cancellationToken);
         if (relationship == null)
         {
-            return TypedResults.Problem(
-                title: "User is not blocked",
-                detail: "UserNotBlocked",
-                statusCode: StatusCodes.Status400BadRequest);
+            return TypedResults.NotFound();
         }
 
         dbContext.UserRelationships.Remove(relationship);

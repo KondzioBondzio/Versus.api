@@ -12,9 +12,12 @@ public class RemoveFriendRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/unfriend", HandleAsync)
-        .WithRequestValidation<RemoveFriendRelationshipRequest>();
+        .WithRequestValidation<RemoveFriendRelationshipRequest>()
+        .Produces<Ok>()
+        .Produces<NotFound>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         RemoveFriendRelationshipRequest request,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
@@ -31,10 +34,7 @@ public class RemoveFriendRelationshipHandler : IEndpoint
             .SingleOrDefaultAsync(cancellationToken);
         if (relationship == null)
         {
-            return TypedResults.Problem(
-                title: "Users are not friends",
-                detail: "UsersNotFriends",
-                statusCode: StatusCodes.Status400BadRequest);
+            return TypedResults.NotFound();
         }
 
         dbContext.UserRelationships.Remove(relationship);

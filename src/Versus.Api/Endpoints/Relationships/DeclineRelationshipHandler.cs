@@ -12,9 +12,12 @@ public class DeclineRelationshipHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/decline", HandleAsync)
-        .WithRequestValidation<BlockRelationshipRequest>();
+        .WithRequestValidation<BlockRelationshipRequest>()
+        .Produces<Ok>()
+        .Produces<NotFound>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok, ProblemHttpResult, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         DeclineRelationshipRequest relationshipRequest,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,
@@ -29,10 +32,7 @@ public class DeclineRelationshipHandler : IEndpoint
             .SingleOrDefaultAsync(cancellationToken);
         if (relationship == null)
         {
-            return TypedResults.Problem(
-                title: "Relationship not found",
-                detail: "RelationshipNotFound",
-                statusCode: StatusCodes.Status400BadRequest);
+            return TypedResults.NotFound();
         }
 
         relationship.Status = UserRelationshipStatus.Declined;

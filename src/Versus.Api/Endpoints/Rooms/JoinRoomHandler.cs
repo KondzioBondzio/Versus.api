@@ -13,9 +13,13 @@ public class JoinRoomHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/{id:guid}/join", HandleAsync)
-        .WithRequestValidation<JoinRoomRequest>();
+        .WithRequestValidation<JoinRoomRequest>()
+        .Produces<Ok>()
+        .Produces<NotFound>()
+        .Produces<ValidationProblem>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok, NotFound, ValidationProblem, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         [FromRoute] Guid id,
         [FromBody] JoinRoomRequest request,
         ClaimsPrincipal claimsPrincipal,
@@ -41,14 +45,14 @@ public class JoinRoomHandler : IEndpoint
                 }
             });
         }
-        
+
         // TODO: Refactor
         var isRoomOwner = room.HostId == userId;
         if (isRoomOwner)
         {
             return TypedResults.Ok();
         }
-        
+
         // TODO: Refactor
         var hasAlreadyJoinedRoom = await dbContext.RoomUsers
             .AsNoTracking()
@@ -60,7 +64,8 @@ public class JoinRoomHandler : IEndpoint
 
         room.Users.Add(new RoomUser
         {
-            RoomId = room.Id, UserId = userId
+            RoomId = room.Id,
+            UserId = userId
         });
         await dbContext.SaveChangesAsync(cancellationToken);
 

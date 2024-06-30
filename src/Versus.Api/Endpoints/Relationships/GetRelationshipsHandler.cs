@@ -14,9 +14,11 @@ public class GetRelationshipsHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/", HandleAsync)
-        .WithRequestValidation<GetRelationshipsRequest>();
+        .WithRequestValidation<GetRelationshipsRequest>()
+        .Produces<Ok<PagedResponse<GetRelationshipsResponse>>>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<Ok<PagedResponse<GetRelationshipsResponse>>, UnauthorizedHttpResult>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         [AsParameters] GetRelationshipsRequest request,
         ClaimsPrincipal claimsPrincipal,
         VersusDbContext dbContext,

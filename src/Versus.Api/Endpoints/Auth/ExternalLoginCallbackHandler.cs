@@ -11,9 +11,12 @@ public class ExternalLoginCallbackHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/login/{scheme}/callback", HandleAsync)
-        .AllowAnonymous();
+        .AllowAnonymous()
+        .Produces<NoContent>()
+        .Produces<ContentHttpResult>()
+        .Produces<UnauthorizedHttpResult>();
 
-    public static async Task<Results<ContentHttpResult, UnauthorizedHttpResult, NoContent>> HandleAsync(
+    public static async Task<IResult> HandleAsync(
         string scheme,
         HttpContext httpContext,
         ITokenService tokenService,

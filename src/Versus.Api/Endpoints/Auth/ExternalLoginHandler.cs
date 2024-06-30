@@ -8,11 +8,10 @@ public class ExternalLoginHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapGet("/login/{scheme}", Handle)
-        .AllowAnonymous();
+        .AllowAnonymous()
+        .Produces<ChallengeHttpResult>();
 
-    public static ChallengeHttpResult Handle(
-        string scheme,
-        CancellationToken cancellationToken)
+    public static IResult Handle(string scheme, CancellationToken cancellationToken)
     {
         // TODO: use LinkGenerator to generate callback url
         string redirectUrl = $"api/auth/login/{scheme}/callback";

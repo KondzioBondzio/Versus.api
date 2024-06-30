@@ -4,7 +4,10 @@ public class Room
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
     public string? Password { get; set; }
+    public DateTime PlayDate { get; set; } = DateTime.UtcNow;
+    public RoomStatus Status { get; set; }
 
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
