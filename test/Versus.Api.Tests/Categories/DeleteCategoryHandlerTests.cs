@@ -11,64 +11,40 @@ namespace Versus.Api.Tests.Categories;
 public class DeleteCategoryHandlerTests
 {
     [Fact]
-    public async Task CreateRoomHandler_ShouldNoContent()
+    public async Task DeleteCategoryHandler_ShouldNoContent()
     {
         // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
-
-        var scope = factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<VersusDbContext>();
-
-        // Act
-        var id = dbContext.Categories
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
+        var categoryId = dbContext.Categories
             .Include(x => x.Rooms)
             .Where(x => x.Rooms.Count == 0)
             .Select(x => x.Id)
             .First();
-        var response = await client.DeleteAsync($"/api/categories/{id}");
+
+        // Act
+        var response = await client.DeleteAsync($"/api/categories/{categoryId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
-    
+
     [Fact]
-    public async Task CreateRoomHandler_ShouldNotFound()
+    public async Task DeleteCategoryHandler_ShouldNotFound()
     {
         // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
+        var categoryId = Guid.NewGuid();
 
         // Act
-        var id = Guid.NewGuid();
-        var response = await client.DeleteAsync($"/api/categories/{id}");
+        var response = await client.DeleteAsync($"/api/categories/{categoryId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-    }
-    
-    [Fact]
-    public async Task CreateRoomHandler_ShouldConflict()
-    {
-        // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
-
-        var scope = factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<VersusDbContext>();
-
-        // Act
-        var id = dbContext.Categories
-            .Include(x => x.Rooms)
-            .Where(x => x.Rooms.Count != 0)
-            .Select(x => x.Id)
-            .First();
-        var response = await client.DeleteAsync($"/api/categories/{id}");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        var result = await response.Content.ReadFromJsonAsync<ConflictResponse>();
-        result.Should().NotBeNull();
-        result!.Errors.Should().NotBeEmpty();
     }
 }

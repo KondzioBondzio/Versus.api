@@ -1,17 +1,20 @@
 ﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Versus.Api.Data;
-using Versus.Shared.Auth;
+using Versus.Api.Entities;
+using Versus.Api.Services.Auth;
+using Versus.Api.Tests.DataSources;
 
 namespace Versus.Api.Tests;
 
 internal class WebAppFixture : WebApplicationFactory<Program>
 {
+    public VersusDbContext DbContext => Services.CreateScope().ServiceProvider.GetRequiredService<VersusDbContext>();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
@@ -27,33 +30,25 @@ internal class WebAppFixture : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            services.AddDbContextPool<VersusDbContext>(options =>
-                options.UseSqlite(keepAliveConnection));
-
+            services.AddDbContextPool<VersusDbContext>(options => options.UseSqlite(keepAliveConnection));
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<VersusDbContext>();
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.EnsureCreated();
-
-            // migrate initial database state
-            new TestDatabaseSeeder(scope.ServiceProvider).SeedDatabase(dbContext).GetAwaiter().GetResult();
+            new VersusTestDatabaseSeeder(scope.ServiceProvider)
+                .SeedAsync(CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
         });
     }
 
-    public async Task<HttpClient> CreateAuthenticatedClient()
+    public HttpClient CreateAuthenticatedClient(User user)
     {
+        var tokenService = Services.CreateScope().ServiceProvider.GetRequiredService<ITokenService>();
+        var accessToken = tokenService.GenerateAccessToken(user);
+
         var client = CreateClient();
-        var authRequest = new LoginRequest
-        {
-            Login = "User1@test.com", Password = "Qwerty1!"
-        };
-        
-        var response = await client.PostAsJsonAsync("/api/auth/login", authRequest);
-        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result!.AccessToken);
-        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
         return client;
     }
 }

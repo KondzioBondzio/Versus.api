@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Versus.Api.Data;
 using Versus.Shared.Rooms;
 
 namespace Versus.Api.Tests.Rooms;
@@ -13,11 +11,10 @@ public class JoinRoomHandlerTests
     public async Task JoinRoomHandler_ShouldSucceed()
     {
         // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
-
-        var scope = factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<VersusDbContext>();
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
         var room = dbContext.Rooms.First();
 
         // Act

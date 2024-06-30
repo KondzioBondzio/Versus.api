@@ -1,22 +1,21 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Versus.Api.Data;
 using Versus.Shared.Categories;
 using Versus.Shared.Common;
-using Versus.Shared.Rooms;
 
 namespace Versus.Api.Tests.Categories;
 
 public class GetCategoriesHandlerTests
 {
     [Fact]
-    public async Task CreateRoomHandler_ShouldSucceed()
+    public async Task GetCategoriesHandler_ShouldSucceed()
     {
         // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
 
         // Act
         var response = await client.GetAsync("/api/categories");

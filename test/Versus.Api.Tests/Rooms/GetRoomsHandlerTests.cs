@@ -13,8 +13,10 @@ public class GetRoomHandlerTests
     public async Task GetRoomsHandler_ShouldSucceed()
     {
         // Arrange
-        await using var factory = new WebAppFixture();
-        var client = await factory.CreateAuthenticatedClient();
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
 
         // Act
         var request = new GetRoomsRequest
