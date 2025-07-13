@@ -16,6 +16,8 @@ public sealed class VersusMigrator
 
     public async Task MigrateAsync()
     {
+        await _dbContext.Database.EnsureCreatedAsync();
+
         IEnumerable<string> pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
         if (!pendingMigrations.Any())
         {

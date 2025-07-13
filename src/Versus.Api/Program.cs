@@ -3,6 +3,7 @@ using Serilog;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
 using System.Runtime.CompilerServices;
+using Versus.Api.Migrations;
 
 [assembly: InternalsVisibleTo("Versus.Api.Tests")]
 
@@ -66,8 +67,8 @@ app.UseAuthorization();
 
 app.MapEndpoints();
 
-// using IServiceScope scope = app.Services.CreateScope();
-// var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
-// await migrator.MigrateAsync();
+using IServiceScope scope = app.Services.CreateScope();
+var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
+await migrator.MigrateAsync();
 
 await app.RunAsync();
