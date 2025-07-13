@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Versus.Api.Data;
 using Versus.Api.Entities;
@@ -19,10 +19,7 @@ internal class WebAppFixture : WebApplicationFactory<Program>
     {
         base.ConfigureWebHost(builder);
 
-        var keepAliveConnection = new SqliteConnection("DataSource=:memory:");
-        keepAliveConnection.Open();
-
-        _ = builder.ConfigureServices(services =>
+        _ = builder.ConfigureServices((context, services) =>
         {
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<VersusDbContext>));
             if (descriptor != null)
@@ -30,7 +27,8 @@ internal class WebAppFixture : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            services.AddDbContextPool<VersusDbContext>(options => options.UseSqlite(keepAliveConnection));
+            var connectionString = context.Configuration.GetConnectionString("Test");
+            services.AddDbContextPool<VersusDbContext>(options => options.UseNpgsql(connectionString));
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
@@ -50,5 +48,12 @@ internal class WebAppFixture : WebApplicationFactory<Program>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         return client;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        await DbContext.Database.EnsureDeletedAsync();
+        await DbContext.DisposeAsync();
+        await base.DisposeAsync();
     }
 }

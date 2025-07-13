@@ -13,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Host.AddLogging(builder.Configuration);
 
-builder.Services.AddSwagger();
+builder.Services.AddOpenApi();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
@@ -47,8 +47,7 @@ app.UseSerilogRequestLogging(options => { options.IncludeQueryInRequestPath = tr
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
 }
 
 // order of items below does matter!
