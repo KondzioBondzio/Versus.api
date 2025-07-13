@@ -16,7 +16,6 @@ builder.Host.AddLogging(builder.Configuration);
 builder.Services.AddOpenApi();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddIdentity(builder.Configuration);
-builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddVersusFeatureManagement();
 builder.Services.AddVersusServices(builder.Configuration);
