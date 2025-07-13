@@ -8,12 +8,13 @@ public class LoginHandlerTests
 {
     [Theory]
     [InlineData("demo1@test.com", "Qwerty1!")]
-    public async Task LoginHandler_ShouldSucceed(string login, string password)
+    public async Task LoginHandler_WithValidCredentials_ShouldSucceed(string login, string password)
     {
         // Arrange
         await using var factory = new WebAppFixture();
         var client = factory.CreateClient();
-
+        
+        // TODO: replace with DbContext call?
         _ = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest
         {
             Login = login,
@@ -26,10 +27,12 @@ public class LoginHandlerTests
         });
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest
+        var request = new LoginRequest
         {
-            Login = login, Password = password
-        });
+            Login = login,
+            Password = password
+        };
+        var response = await client.PostAsJsonAsync("/api/auth/login", request);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -40,20 +43,28 @@ public class LoginHandlerTests
         Assert.NotEqual(string.Empty, result.RefreshToken);
     }
 
-    [Fact]
-    public async Task LoginHandler_ShouldFailRequestValidation()
+    [Theory]
+    [InlineData("", "", HttpStatusCode.BadRequest)]
+    [InlineData("invalid", "password", HttpStatusCode.BadRequest)]
+    [InlineData("demo1@test.com", "1", HttpStatusCode.BadRequest)]
+    [InlineData("nonexistent@test.com", "ValidPass1!", HttpStatusCode.Unauthorized)]
+    [InlineData("demo1@test.com", "WrongPass1!", HttpStatusCode.Unauthorized)]
+    public async Task LoginHandler_WithInvalidCredentials_ShouldFail(string login, string password,
+        HttpStatusCode expectedStatusCode)
     {
         // Arrange
         await using var factory = new WebAppFixture();
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest
+        var request = new LoginRequest
         {
-            Login = string.Empty, Password = string.Empty
-        });
+            Login = login,
+            Password = password
+        };
+        var response = await client.PostAsJsonAsync("/api/auth/login", request);
 
         // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(expectedStatusCode, response.StatusCode);
     }
 }
