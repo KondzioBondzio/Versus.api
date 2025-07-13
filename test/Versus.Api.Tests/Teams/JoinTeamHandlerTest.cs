@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 
 namespace Versus.Api.Tests.Teams;
 
@@ -19,6 +18,6 @@ public class JoinTeamHandlerTests
         var response = await client.PostAsync($"/api/teams/{teamId}/join", new StringContent(string.Empty));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 }

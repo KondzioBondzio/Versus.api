@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using Versus.Api.Data;
 using Versus.Api.Entities;
@@ -36,7 +35,7 @@ public class FeatureManagementTests
         var isEnabled = await featureManager.IsEnabledAsync("versus.feature.demoEnabled");
 
         // Assert
-        isEnabled.Should().BeTrue();
+        Assert.True(isEnabled);
     }
 
     [Fact]
@@ -60,6 +59,6 @@ public class FeatureManagementTests
         var isEnabled = await featureManager.IsEnabledAsync("versus.feature.demoDisabled");
 
         // Assert
-        isEnabled.Should().BeFalse();
+        Assert.False(isEnabled);
     }
 }

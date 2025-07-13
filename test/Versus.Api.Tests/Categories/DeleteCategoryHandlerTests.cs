@@ -1,10 +1,5 @@
 ﻿using System.Net;
-using System.Net.Http.Json;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Versus.Api.Data;
-using Versus.Shared.Common;
 
 namespace Versus.Api.Tests.Categories;
 
@@ -28,7 +23,7 @@ public class DeleteCategoryHandlerTests
         var response = await client.DeleteAsync($"/api/categories/{categoryId}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]
@@ -45,6 +40,6 @@ public class DeleteCategoryHandlerTests
         var response = await client.DeleteAsync($"/api/categories/{categoryId}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

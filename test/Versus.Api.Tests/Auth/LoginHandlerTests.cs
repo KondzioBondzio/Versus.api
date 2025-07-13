@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Tests.Auth;
@@ -33,17 +32,16 @@ public class LoginHandlerTests
         });
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        result.Should().NotBeNull();
-        result.Should().NotBe(string.Empty);
-        result!.TokenType.Should().NotBe(string.Empty);
-        result.AccessToken.Should().NotBe(string.Empty);
-        result.RefreshToken.Should().NotBe(string.Empty);
+        Assert.NotNull(result);
+        Assert.NotEqual(string.Empty, result.TokenType);
+        Assert.NotEqual(string.Empty, result.AccessToken);
+        Assert.NotEqual(string.Empty, result.RefreshToken);
     }
 
     [Fact]
-    public async Task LoginHandler_ShouldFail()
+    public async Task LoginHandler_ShouldFailRequestValidation()
     {
         // Arrange
         await using var factory = new WebAppFixture();
@@ -56,6 +54,6 @@ public class LoginHandlerTests
         });
 
         // Assert
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }

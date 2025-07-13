@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Shared.Auth;
 
 namespace Versus.Api.Tests.Auth;
@@ -29,11 +28,11 @@ public class RegisterHandlerTests
         var response = await client.PostAsJsonAsync("/api/auth/register", RegisterRequest1);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
-    public async Task RegisterHandler_ShouldFail()
+    public async Task RegisterHandler_ShouldFailRequestValidation()
     {
         // Arrange
         await using var factory = new WebAppFixture();
@@ -52,6 +51,6 @@ public class RegisterHandlerTests
         });
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }

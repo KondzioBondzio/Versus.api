@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Shared.Categories;
 
 namespace Versus.Api.Tests.Categories;
@@ -25,6 +24,6 @@ public class UpdateCategoryHandlerTests
         var response = await client.PutAsJsonAsync($"/api/categories/{categoryId}", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 }

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Versus.Api.Configuration;
 using Versus.Api.Entities;
@@ -33,16 +32,16 @@ public class TokenServiceTest
     public void GenerateAccessTokenSuccess()
     {
         string token = _tokenService.GenerateAccessToken(_user);
-        token.Should().NotBeNull();
-        token.Should().NotBe(string.Empty);
+        Assert.NotNull(token);
+        Assert.NotEqual(string.Empty, token);
     }
 
     [Fact]
     public void GenerateRefreshTokenSuccess()
     {
         string token = _tokenService.GenerateAccessToken(_user);
-        token.Should().NotBeNull();
-        token.Should().NotBe(string.Empty);
+        Assert.NotNull(token);
+        Assert.NotEqual(string.Empty, token);
     }
 
     [Fact]
@@ -54,6 +53,6 @@ public class TokenServiceTest
             .Where(x => x.Type == ClaimTypes.NameIdentifier)
             .Select(x => x.Value)
             .First();
-        id.Should().Be(_user.Id.ToString());
+        Assert.Equal(_user.Id.ToString(), id);
     }
 }

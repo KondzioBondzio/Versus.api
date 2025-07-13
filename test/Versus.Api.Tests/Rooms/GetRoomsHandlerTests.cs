@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Api.Tests.Helpers;
 using Versus.Shared.Common;
 using Versus.Shared.Rooms;
@@ -26,9 +25,10 @@ public class GetRoomHandlerTests
         var response = await client.GetAsync($"/api/rooms?{request.AsQueryString()}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);;
         var result = await response.Content.ReadFromJsonAsync<PagedResponse<GetRoomsResponse>>();
-        result.Should().NotBeNull();
-        result!.Data.Should().HaveCountLessOrEqualTo(10);
+        Assert.NotNull(result);
+        Assert.True(result.PageSize <= request.PageSize);
+        Assert.True(result.Data.Count() <= request.PageSize);
     }
 }

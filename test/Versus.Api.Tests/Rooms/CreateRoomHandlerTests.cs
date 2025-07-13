@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Shared.Rooms;
 
 namespace Versus.Api.Tests.Rooms;
@@ -29,6 +28,6 @@ public class CreateRoomHandlerTests
         var response = await client.PostAsJsonAsync("/api/rooms", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 }

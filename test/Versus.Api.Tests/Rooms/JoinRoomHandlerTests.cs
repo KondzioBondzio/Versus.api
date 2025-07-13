@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
 using Versus.Shared.Rooms;
 
 namespace Versus.Api.Tests.Rooms;
@@ -26,6 +25,6 @@ public class JoinRoomHandlerTests
         var response = await client.PostAsJsonAsync($"/api/rooms/{id}/join", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 }
