@@ -26,6 +26,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.NormalizedEmail)
             .IsUnique(false);
 
+        builder.Property(x => x.FirstName)
+            .HasMaxLength(32);
+        builder.Property(x => x.LanguageCode)
+            .HasMaxLength(2);
+        builder.Property(x => x.City)
+            .HasMaxLength(32);
+
         builder.HasMany(x => x.ChatMessages)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
