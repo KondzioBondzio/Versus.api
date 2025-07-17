@@ -20,6 +20,7 @@ builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddVersusFeatureManagement();
 builder.Services.AddVersusServices(builder.Configuration);
+builder.Services.AddPolicyAuthorization();
 
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
