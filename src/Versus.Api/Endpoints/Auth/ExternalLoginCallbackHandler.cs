@@ -32,6 +32,10 @@ public class ExternalLoginCallbackHandler : IEndpoint
 
         string? id = auth.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
         string? email = auth.Principal.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(email))
+        {
+            throw new InvalidOperationException("Missing identity information from external provider.");
+        }
 
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"IsAuthenticated: {auth.Principal.Identity?.IsAuthenticated ?? false}");
