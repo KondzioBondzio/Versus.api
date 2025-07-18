@@ -17,9 +17,7 @@ internal class WebAppFixture : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        base.ConfigureWebHost(builder);
-
-        _ = builder.ConfigureServices((context, services) =>
+        builder.ConfigureServices((context, services) =>
         {
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<VersusDbContext>));
             if (descriptor != null)

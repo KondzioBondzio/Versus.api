@@ -13,7 +13,7 @@ public class VersusTestDatabaseSeeder(IServiceProvider serviceProvider)
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         await _dbContext.Database.EnsureDeletedAsync(cancellationToken);
-        await _dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        await _dbContext.Database.MigrateAsync(cancellationToken);
 
         await SeedPermissions(cancellationToken);
         await SeedRoles(cancellationToken);

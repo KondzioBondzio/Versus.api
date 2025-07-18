@@ -20,7 +20,7 @@ public class CreateRoomHandlerTests
         {
             Name = "Room test",
             Description = "Room test description",
-            PlayDate = DateTime.Today.AddDays(7),
+            PlayDate = DateTime.Today.ToUniversalTime().AddDays(7),
             CategoryId = dbContext.Categories.Select(x => x.Id).First(),
             TeamCount = 2,
             TeamPlayerLimit = 5
