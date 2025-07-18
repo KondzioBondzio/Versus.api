@@ -3,7 +3,8 @@ using Serilog;
 using Versus.Api.Exceptions;
 using Versus.Api.Extensions;
 using System.Runtime.CompilerServices;
-using Versus.Api.Migrations;
+using Microsoft.EntityFrameworkCore;
+using Versus.Api.Data;
 
 [assembly: InternalsVisibleTo("Versus.Api.Tests")]
 
@@ -68,8 +69,11 @@ app.UseAuthorization();
 
 app.MapEndpoints();
 
-using IServiceScope scope = app.Services.CreateScope();
-var migrator = scope.ServiceProvider.GetRequiredService<VersusMigrator>();
-await migrator.MigrateAsync();
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+{
+    using IServiceScope scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<VersusDbContext>();
+    await dbContext.Database.MigrateAsync(CancellationToken.None);
+}
 
 await app.RunAsync();

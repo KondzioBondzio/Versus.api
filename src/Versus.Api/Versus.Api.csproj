@@ -47,4 +47,8 @@
         <ProjectReference Include="..\..\..\Versus.shared\src\Versus.Shared\Versus.Shared.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>

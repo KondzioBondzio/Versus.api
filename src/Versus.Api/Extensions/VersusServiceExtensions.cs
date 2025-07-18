@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Versus.Api.Authorization;
 using Versus.Api.Configuration;
-using Versus.Api.Migrations;
 using Versus.Api.Services.Auth;
 
 namespace Versus.Api.Extensions;
@@ -18,8 +17,6 @@ public static class VersusServiceExtensions
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-
-        services.AddTransient<VersusMigrator>();
 
         return services;
     }
