@@ -12,7 +12,7 @@ public class CreateCategoryHandler : IEndpoint
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPost("/", HandleAsync)
         .WithRequestValidation<CreateCategoryRequest>()
-        .Produces<Created>()
+        .Produces<Created<Category>>()
         .Produces<ValidationProblem>()
         .Produces<UnauthorizedHttpResult>()
         .Produces<ForbidHttpResult>();
@@ -23,8 +23,6 @@ public class CreateCategoryHandler : IEndpoint
         VersusDbContext dbContext,
         CancellationToken cancellationToken)
     {
-        var userId = claimsPrincipal.GetUserId();
-
         var category = new Category
         {
             Name = request.Name,
@@ -35,7 +33,6 @@ public class CreateCategoryHandler : IEndpoint
         await dbContext.Categories.AddAsync(category, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // TODO: Return result?
-        return TypedResults.Created();
+        return TypedResults.Created($"/categories/{category.Id}", category);
     }
 }

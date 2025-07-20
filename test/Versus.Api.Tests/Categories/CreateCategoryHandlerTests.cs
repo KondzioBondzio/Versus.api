@@ -24,5 +24,32 @@ public class CreateCategoryHandlerTests
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var responseCategory = await response.Content.ReadFromJsonAsync<GetCategoryResponse>();
+        Assert.NotNull(responseCategory);
+        Assert.Equal(request.Name, responseCategory.Name);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Category 1")]
+    [InlineData("At least 51 characters name - Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore")]
+    // TODO: check error messages?
+    public async Task CreateCategoryHandler_ShouldFailRequestValidation(string name)
+    {
+        // Arrange
+        await using var fixture = new WebAppFixture();
+        var dbContext = fixture.DbContext;
+        var user = dbContext.Users.First();
+        var client = fixture.CreateAuthenticatedClient(user);
+
+        // Act
+        var request = new CreateCategoryRequest
+        {
+            Name = name
+        };
+        var response = await client.PostAsJsonAsync("/api/categories", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }
