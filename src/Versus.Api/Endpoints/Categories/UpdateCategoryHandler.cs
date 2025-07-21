@@ -12,7 +12,10 @@ public class UpdateCategoryHandler : IEndpoint
 {
     public static void Map(IEndpointRouteBuilder builder) => builder
         .MapPut("/{id:guid}", HandleAsync)
-        .WithRequestValidation<CreateCategoryRequest>()
+        .WithRequestValidation<UpdateCategoryRequest>(context => new Dictionary<string, object?>
+        {
+            ["CategoryId"] = Guid.Parse(context.HttpContext.GetRouteValue("id")?.ToString()!)
+        })
         .Produces<NoContent>()
         .Produces<NotFound>()
         .Produces<ValidationProblem>()
@@ -26,8 +29,6 @@ public class UpdateCategoryHandler : IEndpoint
         VersusDbContext dbContext,
         CancellationToken cancellationToken)
     {
-        var userId = claimsPrincipal.GetUserId();
-
         var category = await dbContext.Categories
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (category == null)
@@ -40,7 +41,6 @@ public class UpdateCategoryHandler : IEndpoint
         category.Image = request.Image;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // TODO: Return result?
         return TypedResults.NoContent();
     }
 }
