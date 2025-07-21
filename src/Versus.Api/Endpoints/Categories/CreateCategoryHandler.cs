@@ -33,6 +33,6 @@ public class CreateCategoryHandler : IEndpoint
         await dbContext.Categories.AddAsync(category, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Created($"/categories/{category.Id}", category);
+        return TypedResults.Created<object>($"/categories/{category.Id}", null);
     }
 }

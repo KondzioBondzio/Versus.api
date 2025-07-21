@@ -24,9 +24,8 @@ public class CreateCategoryHandlerTests
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var responseCategory = await response.Content.ReadFromJsonAsync<GetCategoryResponse>();
-        Assert.NotNull(responseCategory);
-        Assert.Equal(request.Name, responseCategory.Name);
+        Assert.NotNull(response.Headers.Location);
+        Assert.NotEqual(string.Empty, response.Headers.Location.OriginalString);
     }
 
     [Theory]
