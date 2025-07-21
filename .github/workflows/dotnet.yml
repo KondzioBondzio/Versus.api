@@ -27,18 +27,32 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
+    
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Versus.api
+      uses: actions/checkout@v4
       with:
-        submodules: 'recursive'
+        path: Versus.api
+
+    - name: Checkout Versus.Shared
+      uses: actions/checkout@v4
+      with:
+        repository: KondzioBondzio/Versus.Shared
+        path: Versus.shared
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: '9.0.x'
+
     - name: Restore dependencies
+      working-directory: ./Versus.api
       run: dotnet restore
+
     - name: Build
+      working-directory: ./Versus.api
       run: dotnet build --no-restore
+
     - name: Test
+      working-directory: ./Versus.api
       run: dotnet test --no-build --verbosity normal
