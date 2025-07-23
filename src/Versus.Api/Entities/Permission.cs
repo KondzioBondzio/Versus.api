@@ -1,6 +1,6 @@
 namespace Versus.Api.Entities;
 
-public class Permission
+public class Permission : EntityBase
 {
     public Guid Id { get; set; }
     public string Code { get; set; } = string.Empty;

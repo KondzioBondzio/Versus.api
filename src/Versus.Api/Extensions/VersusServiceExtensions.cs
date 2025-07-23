@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Versus.Api.Authorization;
 using Versus.Api.Configuration;
+using Versus.Api.Data;
 using Versus.Api.Services.Auth;
+using Versus.Api.Services.Session;
 
 namespace Versus.Api.Extensions;
 
@@ -11,12 +13,12 @@ public static class VersusServiceExtensions
     {
         services.Configure<JwtTokenConfiguration>(configuration.GetSection("Authentication:Schemes:JwtBearer"));
 
-        services.AddScoped<IUserService, EfUserService>();
-        services.AddScoped<IAuthService, EfAuthService>();
-        services.AddScoped<ITokenService, JwtTokenService>();
-        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
+        services.AddScoped<IAuthService, EfAuthService>();
+        services.AddScoped<ICurrentSessionProvider, HttpContextCurrentSessionProvider>();
+        services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IUserService, EfUserService>();
 
         return services;
     }

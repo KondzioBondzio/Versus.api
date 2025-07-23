@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class Notification
+public class Notification : EntityBase
 {
     public Guid Id { get; set; }
     public int Source { get; set; }

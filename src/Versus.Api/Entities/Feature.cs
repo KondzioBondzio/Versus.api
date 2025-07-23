@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class Feature
+public class Feature : EntityBase
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

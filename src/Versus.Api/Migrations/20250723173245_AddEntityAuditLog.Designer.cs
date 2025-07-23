@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Versus.Api.Data;
@@ -11,9 +12,11 @@ using Versus.Api.Data;
 namespace Versus.Api.Migrations
 {
     [DbContext(typeof(VersusDbContext))]
-    partial class VersusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250723173245_AddEntityAuditLog")]
+    partial class AddEntityAuditLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace Versus.Api.Migrations
                     b.Property<byte>("ChangeType")
                         .HasColumnType("smallint");
 
-                    b.Property<Guid?>("ChangedBy")
+                    b.Property<Guid>("ChangedBy")
                         .HasMaxLength(255)
                         .HasColumnType("uuid");
 

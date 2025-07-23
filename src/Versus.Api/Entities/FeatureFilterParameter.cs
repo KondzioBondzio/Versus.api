@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class FeatureFilterParameter
+public class FeatureFilterParameter : EntityBase
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

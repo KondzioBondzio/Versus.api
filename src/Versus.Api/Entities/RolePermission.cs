@@ -1,6 +1,6 @@
 namespace Versus.Api.Entities;
 
-public class RolePermission
+public class RolePermission : EntityBase
 {
     public Guid Id { get; set; }
 

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Versus.Api.Entities;
 
-public class User : IdentityUser<Guid>
+public class User : IdentityUser<Guid>, IAuditableEntity
 {
     public new string UserName { get; set; } = null!;
 
@@ -25,4 +25,9 @@ public class User : IdentityUser<Guid>
     public virtual ICollection<UserLogin> UserLogins { get; set; } = new HashSet<UserLogin>();
     public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
     public virtual ICollection<UserToken> UserTokens { get; set; } = new HashSet<UserToken>();
+
+    public Guid? CreatedBy { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public Guid? UpdatedBy { get; set; }
+    public DateTime? UpdatedDate { get; set; }
 }

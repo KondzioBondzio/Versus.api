@@ -7,6 +7,7 @@ namespace Versus.Api.Data;
 public class VersusDbContext : IdentityDbContext<User, Role, Guid,
     UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
 {
+    public DbSet<AuditEntry> AuditLogs => Set<AuditEntry>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Feature> Features => Set<Feature>();
     public DbSet<FeatureFilter> FeatureFilters => Set<FeatureFilter>();

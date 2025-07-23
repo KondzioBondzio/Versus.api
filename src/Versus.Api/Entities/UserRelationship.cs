@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class UserRelationship
+public class UserRelationship : EntityBase
 {
     public Guid Id { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class RoomUser
+public class RoomUser : EntityBase
 {
     public Guid Id { get; set; }
 

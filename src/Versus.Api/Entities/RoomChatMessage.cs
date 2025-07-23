@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class RoomChatMessage
+public class RoomChatMessage : EntityBase
 {
     public Guid Id { get; set; }
 

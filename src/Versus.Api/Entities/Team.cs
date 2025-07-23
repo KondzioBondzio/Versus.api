@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class Team
+public class Team : EntityBase
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

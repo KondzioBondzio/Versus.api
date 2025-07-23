@@ -1,6 +1,6 @@
 ﻿namespace Versus.Api.Entities;
 
-public class Room
+public class Room : EntityBase
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
