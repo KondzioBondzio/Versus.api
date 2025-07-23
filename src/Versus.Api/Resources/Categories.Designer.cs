@@ -60,6 +60,15 @@ namespace Versus.Api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Category is used by at least one resource..
+        /// </summary>
+        internal static string InUse {
+            get {
+                return ResourceManager.GetString("InUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Category with the same name already exists..
         /// </summary>
         internal static string NameTaken {

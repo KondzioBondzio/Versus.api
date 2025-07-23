@@ -21,4 +21,7 @@
     <data name="NameTaken" xml:space="preserve">
         <value>Category with the same name already exists.</value>
     </data>
+    <data name="InUse" xml:space="preserve">
+        <value>Category is used by at least one resource.</value>
+    </data>
 </root>
